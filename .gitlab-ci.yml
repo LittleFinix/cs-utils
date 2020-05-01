@@ -32,4 +32,4 @@ pack:
       - publish/win-amd64
       - publish/win-x86
   script:
-    - ls "$PACKAGE_FOLDER" | xargs "$NUGET_PATH" push "{}" -s "$NUGET_REPO_PATH" -k "$NUGET_API_KEY"
+    - find "$PACKAGE_FOLDER" -type f -exec "$NUGET_PATH" push "{}" -s "$NUGET_REPO_PATH" -k "$NUGET_API_KEY" +
