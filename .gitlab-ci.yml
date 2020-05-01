@@ -1,7 +1,7 @@
 # place project specific paths in variables to make the rest of the script more generic
 variables:
   PACKAGE_FOLDER: "nuget"
-  NUGET_PATH: "dotnet nuget"
+  NUGET_PATH: "nuget"
   DOTNET_PATH: "dotnet"
   NUGET_REPO_PATH: "https://nuget.littlefinix.net"
 
@@ -25,4 +25,4 @@ pack:
   only:
     - tags
   script:
-    - for file in $(ls "$PACKAGE_FOLDER"); do "$NUGET_PATH" push "$file" -s "$NUGET_REPO_PATH" -k "$NUGET_API_KEY"; done
+    - for file in $(ls "$PACKAGE_FOLDER"); do "$NUGET_PATH" push "$file" -Source "$NUGET_REPO_PATH" -ApiKey "$NUGET_API_KEY"; done
