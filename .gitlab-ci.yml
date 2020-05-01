@@ -23,13 +23,7 @@ build:
 pack:
   stage: deploy
   only:
+    - tags
     - master
-  artifacts:
-    paths:
-      - publish/anycpu
-      - publish/linux-amd64
-      # - publish/linux-x86
-      - publish/win-amd64
-      - publish/win-x86
   script:
-    - find "$PACKAGE_FOLDER" -type f -exec "$NUGET_PATH" push "{}" -s "$NUGET_REPO_PATH" -k "$NUGET_API_KEY" +
+    - find "$PACKAGE_FOLDER" -type f -exec "$NUGET_PATH" push {} -s "$NUGET_REPO_PATH" -k "$NUGET_API_KEY" +
