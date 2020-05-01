@@ -24,6 +24,5 @@ pack:
   stage: deploy
   only:
     - tags
-    - master
   script:
-    - find "$PACKAGE_FOLDER" -type f -exec "$NUGET_PATH" push {} -s "$NUGET_REPO_PATH" -k "$NUGET_API_KEY" +
+    - for file in $(ls "$PACKAGE_FOLDER"); do "$NUGET_PATH" push "$file" -s "$NUGET_REPO_PATH" -k "$NUGET_API_KEY"; done
