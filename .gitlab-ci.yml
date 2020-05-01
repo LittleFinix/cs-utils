@@ -1,7 +1,7 @@
 # place project specific paths in variables to make the rest of the script more generic
 variables:
-  PACKAGE_FOLDER: "nuget"
-  NUGET_PATH: "nuget"
+  PACKAGE_FOLDER: "nuget_dist"
+  NUGET_PATH: "dotnet nuget"
   DOTNET_PATH: "dotnet"
   NUGET_REPO_PATH: "https://nuget.littlefinix.net"
 
