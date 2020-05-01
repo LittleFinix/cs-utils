@@ -18,11 +18,11 @@ build:
     paths:
       - "$PACKAGE_FOLDER"
   script:
-    - '"$DOTNET_PATH" pack -c Release -o "$PACKAGE_FOLDER"'
+    - '$DOTNET_PATH pack -c Release -o "$PACKAGE_FOLDER"'
 
 pack:
   stage: deploy
   only:
     - tags
   script:
-    - for file in $(ls "$PACKAGE_FOLDER"); do "$NUGET_PATH" push "$file" -Source "$NUGET_REPO_PATH" -ApiKey "$NUGET_API_KEY"; done
+    - for file in $(ls "$PACKAGE_FOLDER"); do $NUGET_PATH push "$file" -Source "$NUGET_REPO_PATH" -ApiKey "$NUGET_API_KEY"; done
