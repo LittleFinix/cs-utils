@@ -6,7 +6,7 @@ variables:
   NUGET_REPO_PATH: "https://nuget.littlefinix.net"
 
 # see https://hub.docker.com/r/microsoft/dotnet/
-image: mcr.microsoft.com/dotnet/core/sdk:3.1
+image: mcr.microsoft.com/dotnet/core/sdk:3.1.201-alpine3.11
 
 stages:
   - build
