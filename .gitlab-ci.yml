@@ -1,10 +1,10 @@
 # place project specific paths in variables to make the rest of the script more generic
 variables:
-  PACKAGE_FOLDER: 'nuget'
-  NUGET_PATH: 'dotnet nuget'
-  DOTNET_PATH: 'dotnet'
-  NUGET_REPO_PATH: 'https://nuget.littlefinix.net'
-  
+  PACKAGE_FOLDER: "nuget"
+  NUGET_PATH: "dotnet nuget"
+  DOTNET_PATH: "dotnet"
+  NUGET_REPO_PATH: "https://nuget.littlefinix.net"
+
 # see https://hub.docker.com/r/microsoft/dotnet/
 image: mcr.microsoft.com/dotnet/core/sdk:3.1
 
@@ -18,8 +18,8 @@ build:
     paths:
       - "$PACKAGE_FOLDER"
   script:
-    - "$DOTNET_PATH" pack -c Release -o "$PACKAGE_FOLDER"
-    
+    - '"$DOTNET_PATH" pack -c Release -o "$PACKAGE_FOLDER"'
+
 pack:
   stage: deploy
   only:
@@ -33,4 +33,3 @@ pack:
       - publish/win-x86
   script:
     - ls "$PACKAGE_FOLDER" | xargs "$NUGET_PATH" push "{}" -s "$NUGET_REPO_PATH" -k "$NUGET_API_KEY"
-    
