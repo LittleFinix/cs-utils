@@ -6,7 +6,7 @@ variables:
   NUGET_REPO_PATH: "https://nuget.littlefinix.net"
 
 # see https://hub.docker.com/r/microsoft/dotnet/
-image: mcr.microsoft.com/dotnet/core/sdk:3.1.201-alpine3.11
+image: mcr.microsoft.com/dotnet/core/sdk:3.1
 
 stages:
   - build
@@ -25,4 +25,4 @@ pack:
   only:
     - tags
   script:
-    - for file in $(ls "$PACKAGE_FOLDER"); do $NUGET_PATH push "$file" -s "$NUGET_REPO_PATH" -k "$NUGET_API_KEY"; done
+    - for file in $(ls "$PACKAGE_FOLDER"); do $NUGET_PATH push "$PACKAGE_FOLDER/$file" -s "$NUGET_REPO_PATH" -k "$NUGET_API_KEY"; done
