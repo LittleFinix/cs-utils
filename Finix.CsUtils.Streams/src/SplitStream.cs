@@ -112,7 +112,7 @@ namespace Finix.CsUtils.IO
             return async (stream) => {
                 try
                 {
-                    await action(stream);
+                    await action(stream).ConfigureAwait(false);
                 }
                 catch (ObjectDisposedException)
                 {
