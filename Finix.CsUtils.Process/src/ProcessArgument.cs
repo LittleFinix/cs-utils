@@ -12,7 +12,7 @@ namespace Finix.CsUtils
 
         public ProcessArgument(object key, object? value = null)
         {
-            Key = key.ToString();
+            Key = key?.ToString() ?? throw new ArgumentNullException(nameof(key));
             Value = value?.ToString();
         }
 
