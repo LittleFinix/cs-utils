@@ -103,7 +103,7 @@ namespace Finix.CsUtils.IO
             catch (ObjectDisposedException)
             {
                 Streams.Remove(stream);
-                return default;
+                return default!;
             }
         }
 
