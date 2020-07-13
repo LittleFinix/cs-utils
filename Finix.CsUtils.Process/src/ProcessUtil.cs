@@ -41,7 +41,7 @@ namespace Finix.CsUtils
             }
 
             var args = process.StartInfo.ArgumentList.Select(arg => EscapeArgument(arg, true));
-            Trace.WriteLine($"Invoking: {process.StartInfo.FileName} {string.Join(" ", args)}");
+            Console.WriteLine($"Invoking: {process.StartInfo.FileName} {string.Join(" ", args)}");
 
             StartAndRedirectOutputs(process, onExit, stdin, stdout, stderr);
 
