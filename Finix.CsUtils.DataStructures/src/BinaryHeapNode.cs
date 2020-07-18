@@ -25,9 +25,9 @@ namespace Finix.CsUtils
             this.index = index;
             this.pages = pages;
 
-            parentIndex = BinaryHeapHelper.CalculateParentIndex(index);
-            leftChildIndex = BinaryHeapHelper.CalculateLeftChildIndex(index);
-            rightChildIndex = BinaryHeapHelper.CalculateRightChildIndex(index);
+            parentIndex = TreeHelper.CalculateParentIndex(index);
+            leftChildIndex = TreeHelper.CalculateLeftChildIndex(index);
+            rightChildIndex = TreeHelper.CalculateRightChildIndex(index);
         }
 
         public IBinaryNode<TKey, TValue> Parent => Reference.GetOrCreate(ref parent, pages, parentIndex);
@@ -44,10 +44,10 @@ namespace Finix.CsUtils
             {
                 var page = pages.GetPageFor(index);
 
-                if (!page.IsIndexAvailable(index))
+                if (!page.IsIndexUsed(index))
                     throw new IndexOutOfRangeException();
 
-                ref var data = ref page.GetReference(index);
+                ref var data = ref page.GetReference(index).Value;
                 return ref data.Value;
             }
         }

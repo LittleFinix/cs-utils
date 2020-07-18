@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections;
+using Finix.CsUtils.DataStructures;
 
 namespace Finix.CsUtils
 {
@@ -21,7 +22,7 @@ namespace Finix.CsUtils
         public virtual bool ContainsIndex(ulong index)
         {
             var page = GetPageFor(index);
-            return page.IsIndexAvailable(index);
+            return page.IsIndexUsed(index);
         }
 
         public virtual ulong FindFreeIndex()
@@ -40,24 +41,27 @@ namespace Finix.CsUtils
             return last;
         }
 
+        public virtual IPageItemRef<T> GetReference(ulong index)
+        {
+            return GetPageFor(index).GetReference(index);
+        }
+
         public virtual bool TryGetValue(ulong index, out T value)
         {
             var page = GetPageFor(index);
 
             value = page[index];
-            return page.IsIndexAvailable(index);
+            return page.IsIndexUsed(index);
         }
 
         public virtual T this[ulong index]
         {
             get
             {
-                var page = GetPageFor(index);
-
-                if (!page.IsIndexAvailable(index))
+                if (!TryGetValue(index, out var value))
                     throw new KeyNotFoundException($"Index {index} is not available");
 
-                return page[index];
+                return value;
             }
 
             set

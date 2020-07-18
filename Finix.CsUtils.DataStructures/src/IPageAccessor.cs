@@ -17,6 +17,8 @@ namespace Finix.CsUtils
 
         ulong FindFreeIndex();
 
+        IPageItemRef<T> GetReference(ulong index);
+
         T this[ulong index] { get; set; }
     }
 }

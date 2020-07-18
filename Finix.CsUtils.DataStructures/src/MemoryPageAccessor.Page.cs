@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Finix.CsUtils.DataStructures;
 
 namespace Finix.CsUtils
 {
@@ -53,11 +54,13 @@ namespace Finix.CsUtils
                 }
             }
 
-            public virtual bool IsIndexAvailable(ulong index)
+            public virtual bool IsIndexUsed(ulong index)
             {
-                index -= Offset;
-
-                return IsAvailable && (buffer[index / 8] & (1 << (int) (index % 8))) != 0;
+                unchecked
+                {
+                    index -= Offset;
+                    return (buffer[index / 8] & (1 << (int) (index % 8))) != 0;
+                }
             }
 
             public virtual bool Load()
@@ -97,78 +100,83 @@ namespace Finix.CsUtils
 
             public void Set(ulong index)
             {
-                Load();
-
-                index -= Offset;
-                buffer[index / 8] |= (byte) (1 << (int) (index % 8));
+                unchecked
+                {
+                    index -= Offset;
+                    buffer[index / 8] |= (byte) (1 << (int) (index % 8));
+                }
             }
 
             public void Clear(ulong index)
             {
-                Load();
+                unchecked
+                {
+                    Full = false;
+                    index -= Offset;
+                    buffer[index / 8] &= (byte) ~(1 << (int) (index % 8));
 
-                Full = false;
-                index -= Offset;
-                buffer[index / 8] &= (byte) ~(1 << (int) (index % 8));
+                    if (Empty)
+                        Unload();
 
-                if (Empty)
-                    Unload();
+                    var lowestPage = memoryPageAccessor.lowestAvailablePage ??= this;
 
-                var lowestPage = memoryPageAccessor.lowestAvailablePage ??= this;
-
-                if (lowestPage.Offset > Offset)
-                    memoryPageAccessor.lowestAvailablePage = this;
+                    if (lowestPage.Offset > Offset)
+                        memoryPageAccessor.lowestAvailablePage = this;
+                }
             }
 
             public virtual bool FindFirstFreeIndex(out ulong index)
             {
-                Load();
-
-                index = 0;
-                if (Full)
-                    return false;
-
-                ulong i, b;
-
-                for (i = 0; i < data_offset; i++)
+                unchecked
                 {
-                    if (buffer[i] != 0xFF)
-                        break;
-                }
+                    index = 0;
+                    if (Full)
+                        return false;
 
-                if (i == data_offset)
-                {
-                    Full = true;
-                    return false;
-                }
+                    ulong i, b;
 
-                for (b = 0; b < 8; b++)
-                {
-                    if (((buffer[i] >> (byte) b) & 1) == 0)
-                        break;
-                }
+                    for (i = 0; i < data_offset; i++)
+                    {
+                        if (buffer[i] != 0xFF)
+                            break;
+                    }
 
-                index = i * 8UL + b + Offset;
-                return true;
+                    if (i == data_offset)
+                    {
+                        Full = true;
+                        return false;
+                    }
+
+                    for (b = 0; b < 8; b++)
+                    {
+                        if (((buffer[i] >> (byte) b) & 1) == 0)
+                            break;
+                    }
+
+                    index = i * 8UL + b + Offset;
+                    return true;
+                }
             }
 
-            public virtual ref T GetReference(ulong index)
+            public virtual IPageItemRef<T> GetReference(ulong index)
             {
-                return ref *GetPointer(index);
+                var idx = index - Offset;
+                return new MemoryPageItemRef<T>(GetPointer(index), buffer + idx / 8, index);
             }
 
             protected virtual T* GetPointer(ulong index)
             {
-                Load();
-                index -= Offset;
-
-                return (T*) (buffer + data_offset + index * (ulong) sizeof(T));
+                unchecked
+                {
+                    index -= Offset;
+                    return (T*) (buffer + data_offset + index * (ulong) sizeof(T));
+                }
             }
 
             public T this[ulong index]
             {
-                get => *GetPointer(index);
-                set => *GetPointer(index) = value;
+                get => GetPointer(index)[0];
+                set => GetPointer(index)[0] = value;
             }
         }
     }

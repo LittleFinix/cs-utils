@@ -12,7 +12,7 @@ namespace Finix.CsUtils
 
         ulong AllocatedBytes { get; }
 
-        bool IsIndexAvailable(ulong index);
+        bool IsIndexUsed(ulong index);
 
         bool FindFirstFreeIndex(out ulong index);
 
@@ -20,7 +20,7 @@ namespace Finix.CsUtils
 
         bool Unload();
 
-        ref T GetReference(ulong index);
+        IPageItemRef<T> GetReference(ulong index);
 
         void Set(ulong index);
 

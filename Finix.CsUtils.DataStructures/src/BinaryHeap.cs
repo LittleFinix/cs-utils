@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Linq;
 using System.Collections.Generic;
 using System;
@@ -33,21 +33,13 @@ namespace Finix.CsUtils
             return;
         }
 
-        public IBinaryNode<TKey, TValue>? FindValue(TKey key)
-        {
-            if (!FindIndex(key, out var idx))
-                return null;
-
-            return new BinaryHeapNode<TKey, TValue>(pages, idx);
-        }
-
         public void Add(TKey key, TValue value)
         {
             if (FindIndex(key, out var idx))
             {
                 // Console.WriteLine($"Adding value to heap at existing index {idx}");
 
-                pages.GetPageFor(idx).GetReference(idx).Value = value;
+                pages.GetReference(idx).Value.Value = value;
                 return;
             }
 
@@ -95,11 +87,11 @@ namespace Finix.CsUtils
         {
             idx = 0;
 
-            while (true) // idx == 0 || BinaryHeapHelper.CalculateDepthForIndex(idx) < MAX_DEPTH
+            while (true) // idx == 0 || TreeHelper.CalculateDepthForIndex(idx) < MAX_DEPTH
             {
                 var page = pages.GetPageFor(idx);
 
-                if (!page.IsIndexAvailable(idx))
+                if (!page.IsIndexUsed(idx))
                     return false;
 
                 var comp = key.CompareTo(page[idx].Key);
@@ -107,9 +99,9 @@ namespace Finix.CsUtils
                 if (comp == 0)
                     return true;
                 else if (comp > 0)
-                    idx = BinaryHeapHelper.CalculateLeftChildIndex(idx);
+                    idx = TreeHelper.CalculateLeftChildIndex(idx);
                 else
-                    idx = BinaryHeapHelper.CalculateRightChildIndex(idx);
+                    idx = TreeHelper.CalculateRightChildIndex(idx);
             }
 
             // return false;
@@ -117,7 +109,7 @@ namespace Finix.CsUtils
 
         private void BubbleUp(ulong index)
         {
-            var parent = BinaryHeapHelper.CalculateParentIndex(index);
+            var parent = TreeHelper.CalculateParentIndex(index);
             // Console.WriteLine($"BUBBLE UP: bubbling {index} (parent: {parent})");
 
             while (index > 0 && pages[index].Key.CompareTo(pages[parent].Key) < 0)
@@ -126,7 +118,7 @@ namespace Finix.CsUtils
                 Swap(index, parent);
 
                 index = parent;
-                parent = BinaryHeapHelper.CalculateParentIndex(index);
+                parent = TreeHelper.CalculateParentIndex(index);
             }
         }
 
@@ -145,14 +137,14 @@ namespace Finix.CsUtils
         {
             var key = pages.GetPageFor(index)[index].Key;
 
-            var lchild = BinaryHeapHelper.CalculateLeftChildIndex(index);
-            var rchild = BinaryHeapHelper.CalculateRightChildIndex(index);
+            var lchild = TreeHelper.CalculateLeftChildIndex(index);
+            var rchild = TreeHelper.CalculateRightChildIndex(index);
 
             var p1 = pages.GetPageFor(lchild);
             var p2 = pages.GetPageFor(rchild);
 
-            var lchild_avail = p1.IsIndexAvailable(lchild);
-            var rchild_avail = p2.IsIndexAvailable(rchild);
+            var lchild_avail = p1.IsIndexUsed(lchild);
+            var rchild_avail = p2.IsIndexUsed(rchild);
 
             child = 0;
             if (lchild_avail && !rchild_avail)
@@ -194,12 +186,6 @@ namespace Finix.CsUtils
 
             pages[indexB] = valA;
             pages[indexA] = valB;
-        }
-
-        public TValue this[TKey key]
-        {
-            get => FindValue(key)?.Value ?? throw new KeyNotFoundException(key.ToString());
-            set => Add(key, value);
         }
 
         public struct Data

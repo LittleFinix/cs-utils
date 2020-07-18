@@ -13,8 +13,12 @@ namespace Finix.CsUtils
 
         private ulong lowestUnusedPageIndex = 0;
 
+        private ulong highestUsedPageIndex = 0;
+
         public override ulong FindFreeIndex()
         {
+            return base.FindFreeIndex();
+
             if (lowestAvailablePage == null)
                 return 0;
 
@@ -67,21 +71,20 @@ namespace Finix.CsUtils
 
         protected virtual IPage<T> CreatePage(ulong pageIndex)
         {
-            if (lowestUnusedPageIndex == pageIndex)
+            if (pageIndex > highestUsedPageIndex)
             {
-                ulong last = 0;
-                foreach (var kv in Pages)
-                {
-                    if (kv.Key == last) {
-                        last++;
-                    } else if (kv.Key > last) {
-                        lowestUnusedPageIndex = last;
-                        break;
-                    }
-                }
+                highestUsedPageIndex = pageIndex;
             }
 
-            return new Page(this, pageIndex * PageSize, PageSize);
+            if (lowestUnusedPageIndex == pageIndex)
+            {
+                lowestUnusedPageIndex = highestUsedPageIndex + 1;
+            }
+
+            var page = new Page(this, pageIndex * PageSize, PageSize);
+            page.Load();
+
+            return page;
         }
     }
 }
