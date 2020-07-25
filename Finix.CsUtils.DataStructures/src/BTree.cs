@@ -13,7 +13,7 @@ namespace Finix.CsUtils
 
         private IPageAccessor<BTreeNode<TKey, TValue>.Data> pages;
 
-        public BTree(IPageAccessor<BTreeNode<TKey, TValue>.Data> pageAccessor, int arity = 3)
+        public BTree(IPageAccessor<BTreeNode<TKey, TValue>.Data> pageAccessor, int arity = 2)
         {
             // Console.WriteLine($"Creating new heap");
             pages = pageAccessor;
@@ -97,13 +97,12 @@ namespace Finix.CsUtils
                 return;
             }
 
-            while (parent.TreeNode.Owner != null && !parent.IsAvailable) {
-                parent = parent.TreeNode.Owner;
-            }
+            // while (parent.TreeNode.Owner != null && !parent.IsAvailable) {
+            //     parent = parent.TreeNode.Owner;
+            // }
 
-            if (parent.Key.CompareTo(key) > 0)
+            if (parent.IsAvailable && parent.Key.CompareTo(key) > 0 && parent.LesserNode != null)
             {
-                parent.LesserNode ??= BTreeNode<TKey, TValue>.Create(pages, Arity);
                 parent = parent.LesserNode.Add(key, value);
             }
             else
@@ -113,8 +112,13 @@ namespace Finix.CsUtils
 
             var d = 0;
             var p = parent.TreeNode;
+            var prev = p;
             while ((p = p.Parent) != null)
             {
+                if (p == prev)
+                    break;
+
+                prev = p;
                 d++;
             }
 

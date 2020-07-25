@@ -97,7 +97,7 @@ namespace Finix.CsUtils
         {
             node = default;
 
-            for (var i = 0; i < arity; i++)
+            for (var i = 0; i <= arity; i++)
             {
                 var n = Values[i];
 
@@ -130,25 +130,50 @@ namespace Finix.CsUtils
                         v.Set(key, value);
                         return val;
                     }
+                    else if (v.Key.CompareTo(key) > 0)
+                    {
+                        Shift(i, 1);
 
-                    continue;
+                        Console.WriteLine($"{Values[arity]}");
+
+                        if (Values[arity].IsAvailable)
+                            i = arity;
+
+                        // else
+                        //     v = (v.LesserNode = Create(pages, arity)).Values[0];
+
+                        v.Unset(false);
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
 
                 val = v;
                 break;
             }
 
+            if (val.IsAvailable)
+                throw new Exception("AVAIL");
+
             val.Set(key, value);
 
-            if (i == arity)
-                Split();
+            if (i >= arity)
+            {
+                var nval = val.TreeNode.Split();
+
+                if (val.TreeNode.Owner != null)
+                    nval.TreeNode.MigrateUp();
+            }
 
             return val;
         }
 
         public IBTreeValue<TKey, TValue> Split()
         {
-            var count = Values.Count - 1;
+
+            var count = Values.Count;
 
             count /= 2;
 
@@ -160,26 +185,43 @@ namespace Finix.CsUtils
             var left = BTreeNode<TKey, TValue>.Create(pages, arity);
             var right = BTreeNode<TKey, TValue>.Create(pages, arity);
 
+            Console.WriteLine($"Split {median.Key}");
+
+            var i = 0;
             foreach (var v in first)
             {
-                left.Add(v.Key, v.Value).LesserNode = v.LesserNode;
+                left.Values[i].LesserNode = v.LesserNode;
+
+                Console.WriteLine($"Left split {v}");
+                if (v.IsAvailable)
+                    left.Values[i].Set(v.Key, v.Value);
+
+                i++;
                 v.Unset(false);
+
+                if (!v.IsAvailable)
+                    break;
             }
 
+            i = 0;
             foreach (var v in second)
             {
-                right.Add(v.Key, v.Value).LesserNode = v.LesserNode;
+                right.Values[i].LesserNode = v.LesserNode;
+
+                Console.WriteLine($"Right split {v}");
+                if (v.IsAvailable)
+                    right.Values[i].Set(v.Key, v.Value);
+
+                i++;
                 v.Unset(false);
+
+                if (!v.IsAvailable)
+                    break;
             }
 
             var last_left = left.Values.SkipWhile(l => l.IsAvailable).First();
             last_left.Unset();
             last_left.LesserNode = median.LesserNode;
-
-            var last_right = right.Values.SkipWhile(r => r.IsAvailable).First();
-
-            // left.MigrateChildren();
-            // right.MigrateChildren();
 
             var mk = median.Key;
             var mv = median.Value;
@@ -194,8 +236,6 @@ namespace Finix.CsUtils
             foreach (var v in values.Skip(2))
                 v.Unset(false);
 
-            // MigrateChildren();
-
             return Values[0];
         }
 
@@ -205,44 +245,76 @@ namespace Finix.CsUtils
                 throw new InvalidOperationException("Root node can't migrate up");
 
             var i = parent.ArityIndex;
-
-            if (i >= arity)
-                return parent; // nothing to do.
+            IBTreeNode<TKey, TValue>? lesser = null;
 
             if (parent.IsAvailable)
-                throw new InvalidOperationException("Only the greatest child of a node may be migrated");
+            {
+                lesser = parent.TreeNode.Values[arity].LesserNode;
+                Shift(parent.TreeNode.Values, i, 1);
 
-            Console.WriteLine($"Migrating {Key}");
+                parent = parent.TreeNode.Values[i];
+            }
+
+            if (i >= arity)
+            {
+                var p = parent.TreeNode.Split();
+
+                if (p.TreeNode.Owner != null)
+                    i = p.TreeNode.MigrateUp().ArityIndex - 1;
+                else
+                    i = p.ArityIndex;
+            }
+
+            if (i == -1)
+                i = 0;
+
+            Console.WriteLine($"Migrating...");
 
             var n = 0;
-            for (; i < arity; i++)
+            for (; i <= arity; i++)
             {
-                parent.TreeNode.Values[i].Unset(false);
-                parent.TreeNode.Values[i].Set(Values[n].Key, Values[n].Value);
-                parent.TreeNode.Values[i].LesserNode = Values[n].LesserNode;
+                var val = Values[n++];
+                var pval = parent.TreeNode.Values[i];
 
-                if (!Values[n].IsAvailable)
+                // pval.Unset(false);
+                pval.LesserNode = val.LesserNode;
+
+                if (!val.IsAvailable || pval.IsAvailable)
+                    break;
+
+                Console.WriteLine($"Migrating {val.Key}");
+                pval.Set(val.Key, val.Value);
+            }
+
+            Console.WriteLine($"Migrated {n} out of {arity} nodes");
+
+            Shift(0, -n);
+
+            var result = parent.TreeNode.Values[i - 1];
+
+            result = MigrateIfNecessary(result);
+
+            if (lesser != null)
+            {
+                var other = parent.TreeNode.Values.SkipWhile(v => v.IsAvailable).First();
+
+                if (other.LesserNode == null)
                 {
-                    i++;
-                    break; // return parent.TreeNode.Values[i];
+                    other.LesserNode = lesser;
                 }
-
-                n++;
-            }
-
-            var j = 0;
-            for (; j < arity; j++)
-            {
-                if (j < arity)
-                    Move(j, j + 1);
                 else
-                    Values[j].Unset(false);
+                {
+                    other.LesserNode.Values
+                        .SkipWhile(v => v.IsAvailable)
+                        .First()
+                        .LesserNode = lesser;
+                }
             }
 
-            i--;
-            parent.TreeNode.Values[i].Unset(false);
-            parent.TreeNode.Values[i].LesserNode = this;
-            return parent.TreeNode.Values[i];
+            if (n < arity)
+                result.LesserNode = this;
+
+            return result;
         }
 
         public void MigrateChildren()
@@ -258,7 +330,7 @@ namespace Finix.CsUtils
         {
             for (var i = 0; i <= arity; i++)
             {
-                Values[i].Unset();
+                Values[i].Unset(false);
 
                 var idx = index + (ulong) i;
 
@@ -272,14 +344,83 @@ namespace Finix.CsUtils
             }
         }
 
-        private void Move(int idxA, int idxB)
+        private IBTreeValue<TKey, TValue> MigrateIfNecessary(IBTreeValue<TKey, TValue> value)
         {
-            var a = Values[idxA];
-            var b = Values[idxB];
+            var result = value;
+
+            if (value.TreeNode.Values[arity].IsAvailable) {
+                result = value.TreeNode.Split();
+
+                if (result.TreeNode.Owner != null)
+                    result = result.TreeNode.MigrateUp();
+            }
+
+            return result;
+        }
+
+        private void Shift(int from, int by)
+        {
+            Shift(Values, from, by);
+        }
+
+        private void Move(int from, int to)
+        {
+            Move(Values, from, to);
+        }
+
+        private static void Shift(IReadOnlyList<IBTreeValue<TKey, TValue>> values, int from, int by)
+        {
+            Console.WriteLine($"Shifting by {by} from {from}");
+            var arity = values.Count - 1;
+
+            if (by == 0)
+            {
+                return;
+            }
+            else if (by > 0)
+            {
+                for (var i = arity; i >= 0; i--)
+                {
+                    var n = i - by;
+
+                    if (n <= arity && n >= 0)
+                        Move(values, n, i);
+                    else
+                        values[i].Unset(false);
+                }
+            }
+            else
+            {
+                for (var i = 0; i <= arity; i++)
+                {
+                    var n = i + by;
+
+                    if (n <= arity && n >= 0)
+                        Move(values, i, n);
+                    else
+                        values[i].Unset(false);
+                }
+            }
+        }
+
+        private static void Move(IReadOnlyList<IBTreeValue<TKey, TValue>> values, int from, int to)
+        {
+            Console.WriteLine($"Moving {from} to {to}");
+
+            var a = values[to];
+            var b = values[from];
+
+            if (a.IsAvailable)
+            {
+                Console.WriteLine($"Overwriting {a.Key}");
+            }
 
             a.Unset(false);
             if (b.IsAvailable)
+            {
+                Console.WriteLine($"Writing {b.Key}");
                 a.Set(b.Key, b.Value);
+            }
 
             a.LesserNode = b.LesserNode;
         }
@@ -405,6 +546,14 @@ namespace Finix.CsUtils
                 data.LesserIndex = 0;
 
                 lesser = null;
+            }
+
+            public override string ToString()
+            {
+                var key = IsAvailable ? Key.ToString() : "<empty>";
+                var val = IsAvailable ? "<null>" : "<empty>";
+
+                return $"{key}: {val}" + (LesserNode != null ? " -> " : "");
             }
         }
 

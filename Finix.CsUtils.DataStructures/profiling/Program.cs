@@ -12,7 +12,7 @@ namespace Finix.CsUtils.DataStructures.Profiling
     {
         static void Main(string[] args)
         {
-            var max = 100;
+            var max = 20;
             using var pages = new MemoryPageAccessor<BTreeNode<long, long>.Data>(1000);
 
             var ref1 = pages.GetReference(0);
@@ -26,21 +26,33 @@ namespace Finix.CsUtils.DataStructures.Profiling
 
             var btree = new BTree<long, long>(pages);
 
-            for (var i = 0L; i < max; i += 2)
-            {
-                if (i % 1000 == 0)
-                    Console.WriteLine($"Adding {i}");
+            var rand = new Random(10);
 
-                btree.Add(i + 1, (i + 1) * 10);
-                Visualizer.Visualize(btree, $"tree_{i}");
-                btree.Add(i, i * 10);
-                Visualizer.Visualize(btree, $"tree_{i + 1}");
+            var range = Enumerable.Range(0, max).ToList();
+            var items = new List<long>();
+
+            while (range.Count > 0)
+            {
+                var i = range.Count - 1; // rand.Next(range.Count);
+
+                items.Add(range[i]);
+                range.RemoveAt(i);
             }
 
-            var rand = new Random(10);
+            for (var i = 0; i < 11; i++)
+            {
+                var idx = items[i];
+
+                Console.WriteLine($"{i}: Adding {idx}");
+                btree.Add(idx, i);
+                Visualizer.Visualize(btree, $"tree_{i}");
+            }
+
+            Visualizer.Visualize(btree);
+
             for (var i = 0; i < 10; i++)
             {
-                var idx = (long) rand.Next(max - 1);
+                var idx = (long) rand.Next(max);
                 Console.WriteLine($"{idx}: {btree[idx]}");
             }
 
