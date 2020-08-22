@@ -70,7 +70,7 @@ namespace Finix.CsUtils
         /// <param name="indicateWhitespace">Indicate whitespace by including a single standard space (' ', U+0x000A) in the output.</param>
         /// <param name="max">Maximum number of words to return in the output (including symbols and whitespace, if applicable), the last element of the output will be the remaining text.</param>
         /// <returns></returns>
-        public static IEnumerable<string> Words(string text, bool includePunctuation = false, bool includeSymbols = false, bool indicateWhitespace = false, int? max = null)
+        public static IEnumerable<string> Words(this string text, bool includePunctuation = false, bool includeSymbols = false, bool indicateWhitespace = false, int? max = null)
         {
             max ??= Int32.MaxValue;
 
@@ -141,7 +141,7 @@ namespace Finix.CsUtils
 
         private static readonly Regex fileNameCleanup = new Regex("([^a-zA-Z0-9 _-])");
 
-        public static string FileName(string text)
+        public static string FileName(this string text)
         {
             foreach (var c in Path.GetInvalidFileNameChars())
                 text = text.Replace(c, '_');
@@ -152,35 +152,45 @@ namespace Finix.CsUtils
             return SnakeCase(text); // Words(text).Select(word => TextInfo.ToLower(word)).Aggregate(Joiner('_'));
         }
 
-        public static string CamelCase(string text)
+        public static string CamelCase(this string text)
         {
-            return String.IsNullOrWhiteSpace(text)
+            return String.IsNullOrWhiteSpace(text.ToString())
                 ? String.Empty
                 : Words(text)
                     .Select(
                         (w, n) =>
-                            n > 0 ? TextInfo.ToTitleCase(w) : TextInfo.ToLower(w)).Aggregate(Joiner(String.Empty));
+                            n > 0 ? TextInfo.ToTitleCase(w) : TextInfo.ToLower(w)).Join(String.Empty);
         }
 
-        public static string CapitalCase(string text)
+        public static string CapitalCase(this string text)
         {
             return String.IsNullOrWhiteSpace(text)
                 ? String.Empty
-                : Words(text).Select(w => TextInfo.ToTitleCase(w)).Aggregate(Joiner(String.Empty));
+                : Words(text).Select(w => TextInfo.ToTitleCase(w)).Join(String.Empty);
         }
 
-        public static string SnakeCase(string text)
+        public static string SnakeCase(this string text)
         {
             return String.IsNullOrWhiteSpace(text)
                 ? String.Empty
-                : Words(text).Select(w => TextInfo.ToLower(w)).Aggregate(Joiner('_'));
+                : Words(text).Select(w => TextInfo.ToLower(w)).Join('_');
         }
 
-        public static string KebabCase(string text)
+        public static string KebabCase(this string text)
         {
             return String.IsNullOrWhiteSpace(text)
                 ? String.Empty
-                : Words(text).Select(w => TextInfo.ToLower(w)).Aggregate(Joiner('-'));
+                : Words(text).Select(w => TextInfo.ToLower(w)).Join('-');
+        }
+
+        public static string Join(this IEnumerable<string> words, char with = ' ')
+        {
+            return words.Aggregate(Joiner(with));
+        }
+
+        public static string Join(this IEnumerable<string> words, string with)
+        {
+            return words.Aggregate(Joiner(with));
         }
 
         public static IEnumerable<string> Split(StringRuneEnumerator text, Rune[] at, Rune[] escapeSingle, (Rune, Rune)[] escapeBetween)
