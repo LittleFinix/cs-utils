@@ -2,811 +2,1350 @@
 
 namespace Finix.CsUtils.MARC
 {
+
     public enum RelatorType
     {
-        /// [abr] A person
+        /// <summary>
+        /// [abr] A person, family, or organization contributing to a resource by shortening or condensing the original work but leaving the nature and content of the original work substantially unchanged. For substantial modifications that result in the creation of a new work, see author
+        /// </summary>
         Abridger,
 
-        /// [act] A performer contributing to an expression of a work by acting as a cast member or player in a musical or dramatic presentation
+        /// <summary>
+        /// [act] A performer contributing to an expression of a work by acting as a cast member or player in a musical or dramatic presentation, etc.
+        /// </summary>
         Actor,
 
-        /// [adp] A person or organization who 1) reworks a musical composition
+        /// <summary>
+        /// [adp] A person or organization who 1) reworks a musical composition, usually for a different medium, or 2) rewrites novels or stories for motion pictures or other audiovisual medium.
+        /// </summary>
         Adapter,
 
-        /// [rcp] A person
+        /// <summary>
+        /// [rcp] A person, family, or organization to whom the correspondence in a work is addressed UF Recipient
+        /// </summary>
         Addressee,
 
-        /// [anl] A person or organization that reviews
+        /// <summary>
+        /// [anl] A person or organization that reviews, examines and interprets data or information in a specific area
+        /// </summary>
         Analyst,
 
-        /// [anm] A person contributing to a moving image work or computer program by giving apparent movement to inanimate objects or drawings. For the creator of the drawings that are animated
+        /// <summary>
+        /// [anm] A person contributing to a moving image work or computer program by giving apparent movement to inanimate objects or drawings. For the creator of the drawings that are animated, see artist
+        /// </summary>
         Animator,
 
+        /// <summary>
         /// [ann] A person who makes manuscript annotations on an item
+        /// </summary>
         Annotator,
 
+        /// <summary>
         /// [apl] A person or organization who appeals a lower court's decision
+        /// </summary>
         Appellant,
 
+        /// <summary>
         /// [ape] A person or organization against whom an appeal is taken
+        /// </summary>
         Appellee,
 
-        /// [app] A person or organization responsible for the submission of an application or who is named as eligible for the results of the processing of the application (e.g.
+        /// <summary>
+        /// [app] A person or organization responsible for the submission of an application or who is named as eligible for the results of the processing of the application (e.g., bestowing of rights, reward, title, position)
+        /// </summary>
         Applicant,
 
-        /// [arc] A person
+        /// <summary>
+        /// [arc] A person, family, or organization responsible for creating an architectural design, including a pictorial representation intended to show how a building, etc., will look when completed. It also oversees the construction of structures
+        /// </summary>
         Architect,
 
-        /// [arr] A person
+        /// <summary>
+        /// [arr] A person, family, or organization contributing to a musical work by rewriting the composition for a medium of performance different from that for which the work was originally intended, or modifying the work for the same medium of performance, etc., such that the musical substance of the original composition remains essentially unchanged. For extensive modification that effectively results in the creation of a new musical work, see composer UF Arranger of music
+        /// </summary>
         Arranger,
 
-        /// [acp] A person (e.g.
+        /// <summary>
+        /// [acp] A person (e.g., a painter or sculptor) who makes copies of works of visual art
+        /// </summary>
         ArtCopyist,
 
+        /// <summary>
         /// [adi] A person contributing to a motion picture or television production by overseeing the artists and craftspeople who build the sets
+        /// </summary>
         ArtDirector,
 
-        /// [art] A person
+        /// <summary>
+        /// [art] A person, family, or organization responsible for creating a work by conceiving, and implementing, an original graphic design, drawing, painting, etc. For book illustrators, prefer Illustrator [ill] UF Graphic technician
+        /// </summary>
         Artist,
 
-        /// [ard] A person responsible for controlling the development of the artistic style of an entire production
+        /// <summary>
+        /// [ard] A person responsible for controlling the development of the artistic style of an entire production, including the choice of works to be presented and selection of senior production staff
+        /// </summary>
         ArtisticDirector,
 
+        /// <summary>
         /// [asg] A person or organization to whom a license for printing or publishing has been transferred
+        /// </summary>
         Assignee,
 
-        /// [asn] A person or organization associated with or found in an item or collection
+        /// <summary>
+        /// [asn] A person or organization associated with or found in an item or collection, which cannot be determined to be that of a Former owner [fmo] or other designated relationship indicative of provenance
+        /// </summary>
         AssociatedName,
 
-        /// [att] An author
+        /// <summary>
+        /// [att] An author, artist, etc., relating him/her to a resource for which there is or once was substantial authority for designating that person as author, creator, etc. of the work UF Supposed name
+        /// </summary>
         AttributedName,
 
-        /// [auc] A person or organization in charge of the estimation and public auctioning of goods
+        /// <summary>
+        /// [auc] A person or organization in charge of the estimation and public auctioning of goods, particularly books, artistic works, etc.
+        /// </summary>
         Auctioneer,
 
-        /// [aut] A person
+        /// <summary>
+        /// [aut] A person, family, or organization responsible for creating a work that is primarily textual in content, regardless of media type (e.g., printed text, spoken word, electronic text, tactile text) or genre (e.g., poems, novels, screenplays, blogs). Use also for persons, etc., creating a new work by paraphrasing, rewriting, or adapting works by another creator such that the modification has substantially changed the nature and content of the original or changed the medium of expression UF Joint author
+        /// </summary>
         Author,
 
-        /// [aqt] A person or organization whose work is largely quoted or extracted in works to which he or she did not contribute directly. Such quotations are found particularly in exhibition catalogs
+        /// <summary>
+        /// [aqt] A person or organization whose work is largely quoted or extracted in works to which he or she did not contribute directly. Such quotations are found particularly in exhibition catalogs, collections of photographs, etc.
+        /// </summary>
         AuthorInQuotationsOrTextAbstracts,
 
-        /// [ colophon]  etc.
+        /// <summary>
+        /// [ colophon]  etc.,aft,A person or organization responsible for an afterword, postface, colophon, etc. but who is not the chief author of a work
+        /// </summary>
         AuthorOfAfterword,
 
+        /// <summary>
         /// [aud] A person or organization responsible for the dialog or spoken commentary for a screenplay or sound recording
+        /// </summary>
         AuthorOfDialog,
 
-        /// [ etc.] aui
+        /// <summary>
+        /// [ etc.] aui,A person or organization responsible for an introduction, preface, foreword, or other critical introductory matter, but who is not the chief author
+        /// </summary>
         AuthorOfIntroduction,
 
+        /// <summary>
         /// [ato] A person whose manuscript signature appears on an item
+        /// </summary>
         Autographer,
 
-        /// [ant] A person or organization responsible for a resource upon which the resource represented by the bibliographic description is based. This may be appropriate for adaptations
+        /// <summary>
+        /// [ant] A person or organization responsible for a resource upon which the resource represented by the bibliographic description is based. This may be appropriate for adaptations, sequels, continuations, indexes, etc.
+        /// </summary>
         BibliographicAntecedent,
 
+        /// <summary>
         /// [bnd] A person who binds an item
+        /// </summary>
         Binder,
 
-        /// [bdd] A person or organization responsible for the binding design of a book
+        /// <summary>
+        /// [bdd] A person or organization responsible for the binding design of a book, including the type of binding, the type of materials used, and any decorative aspects of the binding UF Designer of binding
+        /// </summary>
         BindingDesigner,
 
-        /// [blw] A person or organization responsible for writing a commendation or testimonial for a work
+        /// <summary>
+        /// [blw] A person or organization responsible for writing a commendation or testimonial for a work, which appears on or within the publication itself, frequently on the back or dust jacket of print publications or on advertising material for all media
+        /// </summary>
         BlurbWriter,
 
-        /// [bkd] A person or organization involved in manufacturing a manifestation by being responsible for the entire graphic design of a book
+        /// <summary>
+        /// [bkd] A person or organization involved in manufacturing a manifestation by being responsible for the entire graphic design of a book, including arrangement of type and illustration, choice of materials, and process used UF Designer of book UF Designer of e-book
+        /// </summary>
         BookDesigner,
 
+        /// <summary>
         /// [bkp] A person or organization responsible for the production of books and other print media UF Producer of book
+        /// </summary>
         BookProducer,
 
-        /// [bjd] A person or organization responsible for the design of flexible covers designed for or published with a book
+        /// <summary>
+        /// [bjd] A person or organization responsible for the design of flexible covers designed for or published with a book, including the type of materials used, and any decorative aspects of the bookjacket UF Designer of bookjacket
+        /// </summary>
         BookjacketDesigner,
 
+        /// <summary>
         /// [bpd] A person or organization responsible for the design of a book owner's identification label that is most commonly pasted to the inside front cover of a book
+        /// </summary>
         BookplateDesigner,
 
+        /// <summary>
         /// [bsl] A person or organization who makes books and other bibliographic materials available for purchase. Interest in the materials is primarily lucrative
+        /// </summary>
         Bookseller,
 
-        /// [brl] A person
+        /// <summary>
+        /// [brl] A person, family, or organization involved in manufacturing a resource by embossing Braille cells using a stylus, special embossing printer, or other device
+        /// </summary>
         BrailleEmbosser,
 
-        /// [brd] A person
+        /// <summary>
+        /// [brd] A person, family, or organization involved in broadcasting a resource to an audience via radio, television, webcast, etc.
+        /// </summary>
         Broadcaster,
 
-        /// [cll] A person or organization who writes in an artistic hand
+        /// <summary>
+        /// [cll] A person or organization who writes in an artistic hand, usually as a copyist and or engrosser
+        /// </summary>
         Calligrapher,
 
-        /// [ctg] A person
+        /// <summary>
+        /// [ctg] A person, family, or organization responsible for creating a map, atlas, globe, or other cartographic work
+        /// </summary>
         Cartographer,
 
-        /// [cas] A person
+        /// <summary>
+        /// [cas] A person, family, or organization involved in manufacturing a resource by pouring a liquid or molten substance into a mold and leaving it to solidify to take the shape of the mold
+        /// </summary>
         Caster,
 
-        /// [cns] A person or organization who examines bibliographic resources for the purpose of suppressing parts deemed objectionable on moral
+        /// <summary>
+        /// [cns] A person or organization who examines bibliographic resources for the purpose of suppressing parts deemed objectionable on moral, political, military, or other grounds UF Bowdlerizer UF Expurgator
+        /// </summary>
         Censor,
 
+        /// <summary>
         /// [chr] A person responsible for creating or contributing to a work of movement
+        /// </summary>
         Choreographer,
 
-        /// [cng] A person in charge of photographing a motion picture
+        /// <summary>
+        /// [cng] A person in charge of photographing a motion picture, who plans the technical aspets of lighting and photographing of scenes, and often assists the director in the choice of angles, camera setups, and lighting moods. He or she may also supervise the further processing of filmed material up to the completion of the work print. Cinematographer is also referred to as director of photography. Do not confuse with videographer UF Director of photography
+        /// </summary>
         Cinematographer,
 
+        /// <summary>
         /// [cli] A person or organization for whom another person or organization is acting
+        /// </summary>
         Client,
 
+        /// <summary>
         /// [cor] A curator who lists or inventories the items in an aggregate work such as a collection of items or works
+        /// </summary>
         CollectionRegistrar,
 
-        /// [col] A curator who brings together items from various sources that are then arranged
+        /// <summary>
+        /// [col] A curator who brings together items from various sources that are then arranged, described, and cataloged as a collection. A collector is neither the creator of the material nor a person to whom manuscripts in the collection may have been addressed
+        /// </summary>
         Collector,
 
-        /// [clt] A person
+        /// <summary>
+        /// [clt] A person, family, or organization involved in manufacturing a manifestation of photographic prints from film or other colloid that has ink-receptive and ink-repellent surfaces
+        /// </summary>
         Collotyper,
 
-        /// [clr] A person or organization responsible for applying color to drawings
+        /// <summary>
+        /// [clr] A person or organization responsible for applying color to drawings, prints, photographs, maps, moving images, etc
+        /// </summary>
         Colorist,
 
-        /// [cmm] A performer contributing to a work by providing interpretation
+        /// <summary>
+        /// [cmm] A performer contributing to a work by providing interpretation, analysis, or a discussion of the subject matter on a recording, film, or other audiovisual medium
+        /// </summary>
         Commentator,
 
-        /// [cwt] A person or organization responsible for the commentary or explanatory notes about a text. For the writer of manuscript annotations in a printed book
+        /// <summary>
+        /// [cwt] A person or organization responsible for the commentary or explanatory notes about a text. For the writer of manuscript annotations in a printed book, use Annotator
+        /// </summary>
         CommentatorForWrittenText,
 
-        /// [com] A person
+        /// <summary>
+        /// [com] A person, family, or organization responsible for creating a new work (e.g., a bibliography, a directory) through the act of compilation, e.g., selecting, arranging, aggregating, and editing data, information, etc
+        /// </summary>
         Compiler,
 
-        /// [cpl] A person or organization who applies to the courts for redress
+        /// <summary>
+        /// [cpl] A person or organization who applies to the courts for redress, usually in an equity proceeding
+        /// </summary>
         Complainant,
 
-        /// [cpt] A complainant who takes an appeal from one court or jurisdiction to another to reverse the judgment
+        /// <summary>
+        /// [cpt] A complainant who takes an appeal from one court or jurisdiction to another to reverse the judgment, usually in an equity proceeding
+        /// </summary>
         ComplainantAppellant,
 
-        /// [cpe] A complainant against whom an appeal is taken from one court or jurisdiction to another to reverse the judgment
+        /// <summary>
+        /// [cpe] A complainant against whom an appeal is taken from one court or jurisdiction to another to reverse the judgment, usually in an equity proceeding
+        /// </summary>
         ComplainantAppellee,
 
-        /// [cmp] A person
+        /// <summary>
+        /// [cmp] A person, family, or organization responsible for creating or contributing to a musical resource by adding music to a work that originally lacked it or supplements it
+        /// </summary>
         Composer,
 
-        /// [cmt] A person or organization responsible for the creation of metal slug
+        /// <summary>
+        /// [cmt] A person or organization responsible for the creation of metal slug, or molds made of other materials, used to produce the text and images in printed matter UF Typesetter
+        /// </summary>
         Compositor,
 
-        /// [ccp] A person or organization responsible for the original idea on which a work is based
+        /// <summary>
+        /// [ccp] A person or organization responsible for the original idea on which a work is based, this includes the scientific author of an audio-visual item and the conceptor of an advertisement
+        /// </summary>
         Conceptor,
 
-        /// [cnd] A performer contributing to a musical resource by leading a performing group (orchestra
+        /// <summary>
+        /// [cnd] A performer contributing to a musical resource by leading a performing group (orchestra, chorus, opera, etc.) in a musical or dramatic presentation, etc.
+        /// </summary>
         Conductor,
 
-        /// [con] A person or organization responsible for documenting
+        /// <summary>
+        /// [con] A person or organization responsible for documenting, preserving, or treating printed or manuscript material, works of art, artifacts, or other media UF Preservationist
+        /// </summary>
         Conservator,
 
-        /// [csl] A person or organization relevant to a resource
+        /// <summary>
+        /// [csl] A person or organization relevant to a resource, who is called upon for professional advice or services in a specialized field of knowledge or training
+        /// </summary>
         Consultant,
 
-        /// [csp] A person or organization relevant to a resource
+        /// <summary>
+        /// [csp] A person or organization relevant to a resource, who is engaged specifically to provide an intellectual overview of a strategic or operational task and by analysis, specification, or instruction, to create or propose a cost-effective course of action or solution
+        /// </summary>
         ConsultantToAProject,
 
-        /// [cos] A person(s) or organization who opposes
+        /// <summary>
+        /// [cos] A person(s) or organization who opposes, resists, or disputes, in a court of law, a claim, decision, result, etc.
+        /// </summary>
         Contestant,
 
+        /// <summary>
         /// [cot] A contestant who takes an appeal from one court of law or jurisdiction to another to reverse the judgment
+        /// </summary>
         ContestantAppellant,
 
+        /// <summary>
         /// [coe] A contestant against whom an appeal is taken from one court of law or jurisdiction to another to reverse the judgment
+        /// </summary>
         ContestantAppellee,
 
-        /// [cts] A person(s) or organization defending a claim
+        /// <summary>
+        /// [cts] A person(s) or organization defending a claim, decision, result, etc. being opposed, resisted, or disputed in a court of law
+        /// </summary>
         Contestee,
 
+        /// <summary>
         /// [ctt] A contestee who takes an appeal from one court or jurisdiction to another to reverse the judgment
+        /// </summary>
         ContesteeAppellant,
 
+        /// <summary>
         /// [cte] A contestee against whom an appeal is taken from one court or jurisdiction to another to reverse the judgment
+        /// </summary>
         ContesteeAppellee,
 
-        /// [ctr] A person or organization relevant to a resource
+        /// <summary>
+        /// [ctr] A person or organization relevant to a resource, who enters into a contract with another person or organization to perform a specific
+        /// </summary>
         Contractor,
 
-        /// [ctb] A person
+        /// <summary>
+        /// [ctb] A person, family or organization responsible for making contributions to the resource. This includes those whose work has been contributed to a larger work, such as an anthology, serial publication, or other compilation of individual works. If a more specific role is available, prefer that, e.g. editor, compiler, illustrator UF Collaborator
+        /// </summary>
         Contributor,
 
-        /// [cpc] A person or organization listed as a copyright owner at the time of registration. Copyright can be granted or later transferred to another person or organization
+        /// <summary>
+        /// [cpc] A person or organization listed as a copyright owner at the time of registration. Copyright can be granted or later transferred to another person or organization, at which time the claimant becomes the copyright holder
+        /// </summary>
         CopyrightClaimant,
 
-        /// [cph] A person or organization to whom copy and legal rights have been granted or transferred for the intellectual content of a work. The copyright holder
+        /// <summary>
+        /// [cph] A person or organization to whom copy and legal rights have been granted or transferred for the intellectual content of a work. The copyright holder, although not necessarily the creator of the work, usually has the exclusive right to benefit financially from the sale and use of the work to which the associated copyright protection applies
+        /// </summary>
         CopyrightHolder,
 
-        /// [crr] A person or organization who is a corrector of manuscripts
+        /// <summary>
+        /// [crr] A person or organization who is a corrector of manuscripts, such as the scriptorium official who corrected the work of a scribe. For printed matter, use Proofreader
+        /// </summary>
         Corrector,
 
+        /// <summary>
         /// [crp] A person or organization who was either the writer or recipient of a letter or other communication
+        /// </summary>
         Correspondent,
 
-        /// [cst] A person
+        /// <summary>
+        /// [cst] A person, family, or organization that designs the costumes for a moving image production or for a musical or dramatic presentation or entertainment
+        /// </summary>
         CostumeDesigner,
 
-        /// [cou] A court governed by court rules
+        /// <summary>
+        /// [cou] A court governed by court rules, regardless of their official nature (e.g., laws, administrative regulations)
+        /// </summary>
         CourtGoverned,
 
-        /// [crt] A person
+        /// <summary>
+        /// [crt] A person, family, or organization contributing to a resource by preparing a court's opinions for publication
+        /// </summary>
         CourtReporter,
 
-        /// [cov] A person or organization responsible for the graphic design of a book cover
+        /// <summary>
+        /// [cov] A person or organization responsible for the graphic design of a book cover, album cover, slipcase, box, container, etc. For a person or organization responsible for the graphic design of an entire book, use Book designer; for book jackets, use Bookjacket designer UF Designer of cover
+        /// </summary>
         CoverDesigner,
 
+        /// <summary>
         /// [cre] A person or organization responsible for the intellectual or artistic content of a resource
+        /// </summary>
         Creator,
 
-        /// [cur] A person
+        /// <summary>
+        /// [cur] A person, family, or organization conceiving, aggregating, and/or organizing an exhibition, collection, or other item UF Curator of an exhibition
+        /// </summary>
         Curator,
 
-        /// [dnc] A performer who dances in a musical
+        /// <summary>
+        /// [dnc] A performer who dances in a musical, dramatic, etc., presentation
+        /// </summary>
         Dancer,
 
+        /// <summary>
         /// [dtc] A person or organization that submits data for inclusion in a database or other collection of data
+        /// </summary>
         DataContributor,
 
+        /// <summary>
         /// [dtm] A person or organization responsible for managing databases or other data sources
+        /// </summary>
         DataManager,
 
-        /// [dte] A person
+        /// <summary>
+        /// [dte] A person, family, or organization to whom a resource is dedicated UF Dedicatee of item
+        /// </summary>
         Dedicatee,
 
-        /// [dto] A person who writes a dedication
+        /// <summary>
+        /// [dto] A person who writes a dedication, which may be a formal statement or in epistolary or verse form
+        /// </summary>
         Dedicator,
 
+        /// <summary>
         /// [dfd] A person or organization who is accused in a criminal proceeding or sued in a civil proceeding
+        /// </summary>
         Defendant,
 
-        /// [dft] A defendant who takes an appeal from one court or jurisdiction to another to reverse the judgment
+        /// <summary>
+        /// [dft] A defendant who takes an appeal from one court or jurisdiction to another to reverse the judgment, usually in a legal action
+        /// </summary>
         DefendantAppellant,
 
-        /// [dfe] A defendant against whom an appeal is taken from one court or jurisdiction to another to reverse the judgment
+        /// <summary>
+        /// [dfe] A defendant against whom an appeal is taken from one court or jurisdiction to another to reverse the judgment, usually in a legal action
+        /// </summary>
         DefendantAppellee,
 
+        /// <summary>
         /// [dgg] A organization granting an academic degree UF Degree grantor
+        /// </summary>
         DegreeGrantingInstitution,
 
+        /// <summary>
         /// [dgs] A person overseeing a higher level academic degree
+        /// </summary>
         DegreeSupervisor,
 
+        /// <summary>
         /// [dln] A person or organization executing technical drawings from others' designs
+        /// </summary>
         Delineator,
 
-        /// [dpc] An entity depicted or portrayed in a work
+        /// <summary>
+        /// [dpc] An entity depicted or portrayed in a work, particularly in a work of art
+        /// </summary>
         Depicted,
 
-        /// [dpt] A current owner of an item who deposited the item into the custody of another person
+        /// <summary>
+        /// [dpt] A current owner of an item who deposited the item into the custody of another person, family, or organization, while still retaining ownership
+        /// </summary>
         Depositor,
 
-        /// [dsr] A person
+        /// <summary>
+        /// [dsr] A person, family, or organization responsible for creating a design for an object
+        /// </summary>
         Designer,
 
-        /// [drt] A person responsible for the general management and supervision of a filmed performance
+        /// <summary>
+        /// [drt] A person responsible for the general management and supervision of a filmed performance, a radio or television program, etc.
+        /// </summary>
         Director,
 
+        /// <summary>
         /// [dis] A person who presents a thesis for a university or higher-level educational degree
+        /// </summary>
         Dissertant,
 
-        /// [dbp] A place from which a resource
+        /// <summary>
+        /// [dbp] A place from which a resource, e.g., a serial, is distributed
+        /// </summary>
         DistributionPlace,
 
+        /// <summary>
         /// [dst] A person or organization that has exclusive or shared marketing rights for a resource
+        /// </summary>
         Distributor,
 
+        /// <summary>
         /// [dnr] A former owner of an item who donated that item to another owner
+        /// </summary>
         Donor,
 
-        /// [drm] A person
+        /// <summary>
+        /// [drm] A person, family, or organization contributing to a resource by an architect, inventor, etc., by making detailed plans or drawings for buildings, ships, aircraft, machines, objects, etc UF Technical draftsman
+        /// </summary>
         Draftsman,
 
+        /// <summary>
         /// [dub] A person or organization to which authorship has been dubiously or incorrectly ascribed
+        /// </summary>
         DubiousAuthor,
 
-        /// [edt] A person
+        /// <summary>
+        /// [edt] A person, family, or organization contributing to a resource by revising or elucidating the content, e.g., adding an introduction, notes, or other critical matter. An editor may also prepare a resource for production, publication, or distribution. For major revisions, adaptations, etc., that substantially change the nature and content of the original work, resulting in a new work, see author
+        /// </summary>
         Editor,
 
-        /// [edc] A person
+        /// <summary>
+        /// [edc] A person, family, or organization contributing to a collective or aggregate work by selecting and putting together works, or parts of works, by one or more creators. For compilations of data, information, etc., that result in new works, see compiler
+        /// </summary>
         EditorOfCompilation,
 
-        /// [edm] A person
+        /// <summary>
+        /// [edm] A person, family, or organization responsible for assembling, arranging, and trimming film, video, or other moving image formats, including both visual and audio aspects UF Moving image work editor
+        /// </summary>
         EditorOfMovingImageWork,
 
-        /// [elg] A person responsible for setting up a lighting rig and focusing the lights for a production
+        /// <summary>
+        /// [elg] A person responsible for setting up a lighting rig and focusing the lights for a production, and running the lighting at a performance UF Chief electrician UF House electrician UF Master electrician
+        /// </summary>
         Electrician,
 
+        /// <summary>
         /// [elt] A person or organization who creates a duplicate printing surface by pressure molding and electrodepositing of metal that is then backed up with lead for printing
+        /// </summary>
         Electrotyper,
 
-        /// [enj] A jurisdiction enacting a law
+        /// <summary>
+        /// [enj] A jurisdiction enacting a law, regulation, constitution, court rule, etc.
+        /// </summary>
         EnactingJurisdiction,
 
-        /// [eng] A person or organization that is responsible for technical planning and design
+        /// <summary>
+        /// [eng] A person or organization that is responsible for technical planning and design, particularly with construction
+        /// </summary>
         Engineer,
 
-        /// [egr] A person or organization who cuts letters
+        /// <summary>
+        /// [egr] A person or organization who cuts letters, figures, etc. on a surface, such as a wooden or metal plate used for printing
+        /// </summary>
         Engraver,
 
-        /// [etr] A person or organization who produces text or images for printing by subjecting metal
+        /// <summary>
+        /// [etr] A person or organization who produces text or images for printing by subjecting metal, glass, or some other surface to acid or the corrosive action of some other substance
+        /// </summary>
         Etcher,
 
+        /// <summary>
         /// [evp] A place where an event such as a conference or a concert took place
+        /// </summary>
         EventPlace,
 
-        /// [exp] A person or organization in charge of the description and appraisal of the value of goods
+        /// <summary>
+        /// [exp] A person or organization in charge of the description and appraisal of the value of goods, particularly rare items, works of art, etc. UF Appraiser
+        /// </summary>
         Expert,
 
+        /// <summary>
         /// [fac] A person or organization that executed the facsimile UF Copier
+        /// </summary>
         Facsimilist,
 
+        /// <summary>
         /// [fld] A person or organization that manages or supervises the work done to collect raw data or do research in an actual setting or environment (typically applies to the natural and social sciences)
+        /// </summary>
         FieldDirector,
 
+        /// <summary>
         /// [fmd] A director responsible for the general management and supervision of a filmed performance
+        /// </summary>
         FilmDirector,
 
-        /// [fds] A person
+        /// <summary>
+        /// [fds] A person, family, or organization involved in distributing a moving image resource to theatres or other distribution channels
+        /// </summary>
         FilmDistributor,
 
-        /// [flm] A person who
+        /// <summary>
+        /// [flm] A person who, following the script and in creative cooperation with the Director, selects, arranges, and assembles the filmed material, controls the synchronization of picture and sound, and participates in other post-production tasks such as sound mixing and visual effects processing. Today, picture editing is often performed digitally. UF Motion picture editor
+        /// </summary>
         FilmEditor,
 
+        /// <summary>
         /// [fmp] A producer responsible for most of the business aspects of a film
+        /// </summary>
         FilmProducer,
 
-        /// [fmk] A person
+        /// <summary>
+        /// [fmk] A person, family or organization responsible for creating an independent or personal film. A filmmaker is individually responsible for the conception and execution of all aspects of the film
+        /// </summary>
         Filmmaker,
 
-        /// [fpy] A person or organization who is identified as the only party or the party of the first party. In the case of transfer of rights
+        /// <summary>
+        /// [fpy] A person or organization who is identified as the only party or the party of the first party. In the case of transfer of rights, this is the assignor, transferor, licensor, grantor, etc. Multiple parties can be named jointly as the first party
+        /// </summary>
         FirstParty,
 
-        /// [frg] A person or organization who makes or imitates something of value or importance
+        /// <summary>
+        /// [frg] A person or organization who makes or imitates something of value or importance, especially with the intent to defraud UF Copier UF Counterfeiter
+        /// </summary>
         Forger,
 
-        /// [fmo] A person
+        /// <summary>
+        /// [fmo] A person, family, or organization formerly having legal possession of an item
+        /// </summary>
         FormerOwner,
 
+        /// <summary>
         /// [fnd] A person or organization that furnished financial support for the production of the work
+        /// </summary>
         Funder,
 
+        /// <summary>
         /// [gis] A person responsible for geographic information system (GIS) development and integration with global positioning system data UF Geospatial information specialist
+        /// </summary>
         GeographicInformationSpecialist,
 
-        /// [hnr] A person
+        /// <summary>
+        /// [hnr] A person, family, or organization honored by a work or item (e.g., the honoree of a festschrift, a person to whom a copy is presented) UF Honouree UF Honouree of item
+        /// </summary>
         Honoree,
 
-        /// [hst] A performer contributing to a resource by leading a program (often broadcast) that includes other guests
+        /// <summary>
+        /// [hst] A performer contributing to a resource by leading a program (often broadcast) that includes other guests, performers, etc. (e.g., talk show host)
+        /// </summary>
         Host,
 
-        /// [his] An organization hosting the event
+        /// <summary>
+        /// [his] An organization hosting the event, exhibit, conference, etc., which gave rise to a resource, but having little or no responsibility for the content of the resource
+        /// </summary>
         HostInstitution,
 
-        /// [ilu] A person providing decoration to a specific item using precious metals or color
+        /// <summary>
+        /// [ilu] A person providing decoration to a specific item using precious metals or color, often with elaborate designs and motifs
+        /// </summary>
         Illuminator,
 
-        /// [ill] A person
+        /// <summary>
+        /// [ill] A person, family, or organization contributing to a resource by supplementing the primary content with drawings, diagrams, photographs, etc. If the work is primarily the artistic content created by this entity, use artist or photographer
+        /// </summary>
         Illustrator,
 
+        /// <summary>
         /// [ins] A person who has written a statement of dedication or gift
+        /// </summary>
         Inscriber,
 
+        /// <summary>
         /// [itr] A performer contributing to a resource by playing a musical instrument
+        /// </summary>
         Instrumentalist,
 
-        /// [ive] A person
+        /// <summary>
+        /// [ive] A person, family or organization responsible for creating or contributing to a resource by responding to an interviewer, usually a reporter, pollster, or some other information gathering agent
+        /// </summary>
         Interviewee,
 
-        /// [ivr] A person
+        /// <summary>
+        /// [ivr] A person, family, or organization responsible for creating or contributing to a resource by acting as an interviewer, reporter, pollster, or some other information gathering agent
+        /// </summary>
         Interviewer,
 
-        /// [inv] A person
+        /// <summary>
+        /// [inv] A person, family, or organization responsible for creating a new device or process UF Patent inventor
+        /// </summary>
         Inventor,
 
-        /// [isb] A person
+        /// <summary>
+        /// [isb] A person, family or organization issuing a work, such as an official organ of the body
+        /// </summary>
         IssuingBody,
 
+        /// <summary>
         /// [jud] A person who hears and decides on legal matters in court.
+        /// </summary>
         Judge,
 
-        /// [jug] A jurisdiction governed by a law
+        /// <summary>
+        /// [jug] A jurisdiction governed by a law, regulation, etc., that was enacted by another jurisdiction
+        /// </summary>
         JurisdictionGoverned,
 
+        /// <summary>
         /// [lbr] An organization that provides scientific analyses of material samples
+        /// </summary>
         Laboratory,
 
+        /// <summary>
         /// [ldr] A person or organization that manages or supervises work done in a controlled setting or environment UF Lab director
+        /// </summary>
         LaboratoryDirector,
 
+        /// <summary>
         /// [lsa] An architect responsible for creating landscape works. This work involves coordinating the arrangement of existing and proposed land features and structures
+        /// </summary>
         LandscapeArchitect,
 
-        /// [led] A person or organization that takes primary responsibility for a particular activity or endeavor. May be combined with another relator term or code to show the greater importance this person or organization has regarding that particular role. If more than one relator is assigned to a heading
+        /// <summary>
+        /// [led] A person or organization that takes primary responsibility for a particular activity or endeavor. May be combined with another relator term or code to show the greater importance this person or organization has regarding that particular role. If more than one relator is assigned to a heading, use the Lead relator only if it applies to all the relators
+        /// </summary>
         Lead,
 
-        /// [len] A person or organization permitting the temporary use of a book
+        /// <summary>
+        /// [len] A person or organization permitting the temporary use of a book, manuscript, etc., such as for photocopying or microfilming
+        /// </summary>
         Lender,
 
+        /// <summary>
         /// [lil] A person or organization who files a libel in an ecclesiastical or admiralty case
+        /// </summary>
         Libelant,
 
+        /// <summary>
         /// [lit] A libelant who takes an appeal from one ecclesiastical court or admiralty to another to reverse the judgment
+        /// </summary>
         LibelantAppellant,
 
+        /// <summary>
         /// [lie] A libelant against whom an appeal is taken from one ecclesiastical court or admiralty to another to reverse the judgment
+        /// </summary>
         LibelantAppellee,
 
+        /// <summary>
         /// [lel] A person or organization against whom a libel has been filed in an ecclesiastical court or admiralty
+        /// </summary>
         Libelee,
 
+        /// <summary>
         /// [let] A libelee who takes an appeal from one ecclesiastical court or admiralty to another to reverse the judgment
+        /// </summary>
         LibeleeAppellant,
 
+        /// <summary>
         /// [lee] A libelee against whom an appeal is taken from one ecclesiastical court or admiralty to another to reverse the judgment
+        /// </summary>
         LibeleeAppellee,
 
-        /// [lbt] An author of a libretto of an opera or other stage work
+        /// <summary>
+        /// [lbt] An author of a libretto of an opera or other stage work, or an oratorio
+        /// </summary>
         Librettist,
 
+        /// <summary>
         /// [lse] A person or organization who is an original recipient of the right to print or publish
+        /// </summary>
         Licensee,
 
-        /// [lso] A person or organization who is a signer of the license
+        /// <summary>
+        /// [lso] A person or organization who is a signer of the license, imprimatur, etc UF Imprimatur
+        /// </summary>
         Licensor,
 
-        /// [lgd] A person or organization who designs the lighting scheme for a theatrical presentation
+        /// <summary>
+        /// [lgd] A person or organization who designs the lighting scheme for a theatrical presentation, entertainment, motion picture, etc.
+        /// </summary>
         LightingDesigner,
 
-        /// [ltg] A person or organization who prepares the stone or plate for lithographic printing
+        /// <summary>
+        /// [ltg] A person or organization who prepares the stone or plate for lithographic printing, including a graphic artist creating a design directly on the surface from which printing will be done.
+        /// </summary>
         Lithographer,
 
-        /// [lyr] An author of the words of a non-dramatic musical work (e.g. the text of a song)
+        /// <summary>
+        /// [lyr] An author of the words of a non-dramatic musical work (e.g. the text of a song), except for oratorios
+        /// </summary>
         Lyricist,
 
-        /// [mfp] The place of manufacture (e.g.
+        /// <summary>
+        /// [mfp] The place of manufacture (e.g., printing, duplicating, casting, etc.) of a resource in a published form
+        /// </summary>
         ManufacturePlace,
 
-        /// [mfr] A person or organization responsible for printing
+        /// <summary>
+        /// [mfr] A person or organization responsible for printing, duplicating, casting, etc. a resource
+        /// </summary>
         Manufacturer,
 
-        /// [mrb] The entity responsible for marbling paper
+        /// <summary>
+        /// [mrb] The entity responsible for marbling paper, cloth, leather, etc. used in construction of a resource
+        /// </summary>
         Marbler,
 
-        /// [mrk] A person or organization performing the coding of SGML
+        /// <summary>
+        /// [mrk] A person or organization performing the coding of SGML, HTML, or XML markup of metadata, text, etc. UF Encoder
+        /// </summary>
         MarkupEditor,
 
+        /// <summary>
         /// [med] A person held to be a channel of communication between the earthly world and a world
+        /// </summary>
         Medium,
 
-        /// [mdc] A person or organization primarily responsible for compiling and maintaining the original description of a metadata set (e.g.
+        /// <summary>
+        /// [mdc] A person or organization primarily responsible for compiling and maintaining the original description of a metadata set (e.g., geospatial metadata set)
+        /// </summary>
         MetadataContact,
 
-        /// [mte] An engraver responsible for decorations
+        /// <summary>
+        /// [mte] An engraver responsible for decorations, illustrations, letters, etc. cut on a metal surface for printing or decoration
+        /// </summary>
         MetalEngraver,
 
-        /// [mtk] A person
+        /// <summary>
+        /// [mtk] A person, family, or organization responsible for recording the minutes of a meeting
+        /// </summary>
         MinuteTaker,
 
-        /// [mod] A performer contributing to a resource by leading a program (often broadcast) where topics are discussed
+        /// <summary>
+        /// [mod] A performer contributing to a resource by leading a program (often broadcast) where topics are discussed, usually with participation of experts in fields related to the discussion
+        /// </summary>
         Moderator,
 
-        /// [mon] A person or organization that supervises compliance with the contract and is responsible for the report and controls its distribution. Sometimes referred to as the grantee
+        /// <summary>
+        /// [mon] A person or organization that supervises compliance with the contract and is responsible for the report and controls its distribution. Sometimes referred to as the grantee, or controlling agency
+        /// </summary>
         Monitor,
 
+        /// <summary>
         /// [mcp] A person who transcribes or copies musical notation
+        /// </summary>
         MusicCopyist,
 
-        /// [msd] A person who coordinates the activities of the composer
+        /// <summary>
+        /// [msd] A person who coordinates the activities of the composer, the sound editor, and sound mixers for a moving image production or for a musical or dramatic presentation or entertainment
+        /// </summary>
         MusicalDirector,
 
+        /// <summary>
         /// [mus] A person or organization who performs music or contributes to the musical content of a work when it is not possible or desirable to identify the function more precisely
+        /// </summary>
         Musician,
 
-        /// [nrt] A performer contributing to a resource by reading or speaking in order to give an account of an act
+        /// <summary>
+        /// [nrt] A performer contributing to a resource by reading or speaking in order to give an account of an act, occurrence, course of events, etc
+        /// </summary>
         Narrator,
 
-        /// [osp] A performer contributing to an expression of a work by appearing on screen in nonfiction moving image materials or introductions to fiction moving image materials to provide contextual or background information. Use when another term (e.g.
+        /// <summary>
+        /// [osp] A performer contributing to an expression of a work by appearing on screen in nonfiction moving image materials or introductions to fiction moving image materials to provide contextual or background information. Use when another term (e.g., narrator, host) is either not applicable or not desired
+        /// </summary>
         OnscreenPresenter,
 
+        /// <summary>
         /// [opn] A person or organization responsible for opposing a thesis or dissertation
+        /// </summary>
         Opponent,
 
-        /// [orm] A person
+        /// <summary>
+        /// [orm] A person, family, or organization organizing the exhibit, event, conference, etc., which gave rise to a resource UF Organizer of meeting
+        /// </summary>
         Organizer,
 
-        /// [org] A person or organization performing the work
+        /// <summary>
+        /// [org] A person or organization performing the work, i.e., the name of a person or organization associated with the intellectual content of the work. This category does not include the publisher or personal affiliation, or sponsor except where it is also the corporate author
+        /// </summary>
         Originator,
 
+        /// <summary>
         /// [oth] A role that has no equivalent in the MARC list.
+        /// </summary>
         Other,
 
-        /// [own] A person
+        /// <summary>
+        /// [own] A person, family, or organization that currently owns an item or collection, i.e.has legal possession of a resource UF Current owner
+        /// </summary>
         Owner,
 
-        /// [pan] A performer contributing to a resource by participating in a program (often broadcast) where topics are discussed
+        /// <summary>
+        /// [pan] A performer contributing to a resource by participating in a program (often broadcast) where topics are discussed, usually with participation of experts in fields related to the discussion
+        /// </summary>
         Panelist,
 
-        /// [ppm] A person or organization responsible for the production of paper
+        /// <summary>
+        /// [ppm] A person or organization responsible for the production of paper, usually from wood, cloth, or other fibrous material
+        /// </summary>
         Papermaker,
 
+        /// <summary>
         /// [pta] A person or organization that applied for a patent
+        /// </summary>
         PatentApplicant,
 
+        /// <summary>
         /// [pth] A person or organization that was granted the patent referred to by the item UF Patentee
+        /// </summary>
         PatentHolder,
 
-        /// [pat] A person or organization responsible for commissioning a work. Usually a patron uses his or her means or influence to support the work of artists
+        /// <summary>
+        /// [pat] A person or organization responsible for commissioning a work. Usually a patron uses his or her means or influence to support the work of artists, writers, etc. This includes those who commission and pay for individual works
+        /// </summary>
         Patron,
 
-        /// [prf] A person contributing to a resource by performing music
+        /// <summary>
+        /// [prf] A person contributing to a resource by performing music, acting, dancing, speaking, etc., often in a musical or dramatic presentation, etc. If specific codes are used, [prf] is used for a person whose principal skill is not known or specified
+        /// </summary>
         Performer,
 
+        /// <summary>
         /// [pma] An organization (usually a government agency) that issues permits under which work is accomplished
+        /// </summary>
         PermittingAgency,
 
-        /// [pht] A person
+        /// <summary>
+        /// [pht] A person, family, or organization responsible for creating a photographic work
+        /// </summary>
         Photographer,
 
+        /// <summary>
         /// [ptf] A person or organization who brings a suit in a civil proceeding
+        /// </summary>
         Plaintiff,
 
-        /// [ptt] A plaintiff who takes an appeal from one court or jurisdiction to another to reverse the judgment
+        /// <summary>
+        /// [ptt] A plaintiff who takes an appeal from one court or jurisdiction to another to reverse the judgment, usually in a legal proceeding
+        /// </summary>
         PlaintiffAppellant,
 
-        /// [pte] A plaintiff against whom an appeal is taken from one court or jurisdiction to another to reverse the judgment
+        /// <summary>
+        /// [pte] A plaintiff against whom an appeal is taken from one court or jurisdiction to another to reverse the judgment, usually in a legal proceeding
+        /// </summary>
         PlaintiffAppellee,
 
-        /// [plt] A person
+        /// <summary>
+        /// [plt] A person, family, or organization involved in manufacturing a manifestation by preparing plates used in the production of printed images and/or text
+        /// </summary>
         Platemaker,
 
-        /// [pra] A person who is the faculty moderator of an academic disputation
+        /// <summary>
+        /// [pra] A person who is the faculty moderator of an academic disputation, normally proposing a thesis and participating in the ensuing disputation
+        /// </summary>
         Praeses,
 
-        /// [pre] A person or organization mentioned in an “X presents” credit for moving image materials and who is associated with production
+        /// <summary>
+        /// [pre] A person or organization mentioned in an “X presents” credit for moving image materials and who is associated with production, finance, or distribution in some way. A vanity credit; in early years, normally the head of a studio
+        /// </summary>
         Presenter,
 
-        /// [prt] A person
+        /// <summary>
+        /// [prt] A person, family, or organization involved in manufacturing a manifestation of printed text, notated music, etc., from type or plates, such as a book, newspaper, magazine, broadside, score, etc
+        /// </summary>
         Printer,
 
-        /// [pop] A person or organization who prints illustrations from plates. UF Plates
+        /// <summary>
+        /// [pop] A person or organization who prints illustrations from plates. UF Plates, printer of
+        /// </summary>
         PrinterOfPlates,
 
-        /// [prm] A person or organization who makes a relief
+        /// <summary>
+        /// [prm] A person or organization who makes a relief, intaglio, or planographic printing surface
+        /// </summary>
         Printmaker,
 
-        /// [prc] A person or organization primarily responsible for performing or initiating a process
+        /// <summary>
+        /// [prc] A person or organization primarily responsible for performing or initiating a process, such as is done with the collection of metadata sets
+        /// </summary>
         ProcessContact,
 
-        /// [pro] A person
+        /// <summary>
+        /// [pro] A person, family, or organization responsible for most of the business aspects of a production for screen, audio recording, television, webcast, etc. The producer is generally responsible for fund raising, managing the production, hiring key personnel, arranging for distributors, etc.
+        /// </summary>
         Producer,
 
-        /// [prn] An organization that is responsible for financial
+        /// <summary>
+        /// [prn] An organization that is responsible for financial, technical, and organizational management of a production for stage, screen, audio recording, television, webcast, etc.
+        /// </summary>
         ProductionCompany,
 
+        /// <summary>
         /// [prs] A person or organization responsible for designing the overall visual appearance of a moving image production
+        /// </summary>
         ProductionDesigner,
 
+        /// <summary>
         /// [pmn] A person responsible for all technical and business matters in a production
+        /// </summary>
         ProductionManager,
 
-        /// [prd] A person or organization associated with the production (props
+        /// <summary>
+        /// [prd] A person or organization associated with the production (props, lighting, special effects, etc.) of a musical or dramatic presentation or entertainment
+        /// </summary>
         ProductionPersonnel,
 
-        /// [prp] The place of production (e.g.
+        /// <summary>
+        /// [prp] The place of production (e.g., inscription, fabrication, construction, etc.) of a resource in an unpublished form
+        /// </summary>
         ProductionPlace,
 
-        /// [prg] A person
+        /// <summary>
+        /// [prg] A person, family, or organization responsible for creating a computer program
+        /// </summary>
         Programmer,
 
-        /// [pdr] A person or organization with primary responsibility for all essential aspects of a project
+        /// <summary>
+        /// [pdr] A person or organization with primary responsibility for all essential aspects of a project, has overall responsibility for managing projects, or provides overall direction to a project manager
+        /// </summary>
         ProjectDirector,
 
-        /// [pfr] A person who corrects printed matter. For manuscripts
+        /// <summary>
+        /// [pfr] A person who corrects printed matter. For manuscripts, use Corrector [crr]
+        /// </summary>
         Proofreader,
 
-        /// [prv] A person or organization who produces
+        /// <summary>
+        /// [prv] A person or organization who produces, publishes, manufactures, or distributes a resource if specific codes are not desired (e.g. [mfr], [pbl])
+        /// </summary>
         Provider,
 
+        /// <summary>
         /// [pup] The place where a resource is published
+        /// </summary>
         PublicationPlace,
 
-        /// [pbl] A person or organization responsible for publishing
+        /// <summary>
+        /// [pbl] A person or organization responsible for publishing, releasing, or issuing a resource
+        /// </summary>
         Publisher,
 
-        /// [pbd] A person or organization who presides over the elaboration of a collective work to ensure its coherence or continuity. This includes editors-in-chief
+        /// <summary>
+        /// [pbd] A person or organization who presides over the elaboration of a collective work to ensure its coherence or continuity. This includes editors-in-chief, literary editors, editors of series, etc.
+        /// </summary>
         PublishingDirector,
 
-        /// [ppt] A performer contributing to a resource by manipulating
+        /// <summary>
+        /// [ppt] A performer contributing to a resource by manipulating, controlling, or directing puppets or marionettes in a moving image production or a musical or dramatic presentation or entertainment
+        /// </summary>
         Puppeteer,
 
+        /// <summary>
         /// [rdd] A director responsible for the general management and supervision of a radio program
+        /// </summary>
         RadioDirector,
 
+        /// <summary>
         /// [rpc] A producer responsible for most of the business aspects of a radio program
+        /// </summary>
         RadioProducer,
 
+        /// <summary>
         /// [rce] A person contributing to a resource by supervising the technical aspects of a sound or video recording session
+        /// </summary>
         RecordingEngineer,
 
-        /// [rcd] A person or organization who uses a recording device to capture sounds and/or video during a recording session
+        /// <summary>
+        /// [rcd] A person or organization who uses a recording device to capture sounds and/or video during a recording session, including field recordings of natural sounds, folkloric events, music, etc.
+        /// </summary>
         Recordist,
 
+        /// <summary>
         /// [red] A person or organization who writes or develops the framework for an item without being intellectually responsible for its content
+        /// </summary>
         Redaktor,
 
-        /// [ren] A person or organization who prepares drawings of architectural designs (i.e.
+        /// <summary>
+        /// [ren] A person or organization who prepares drawings of architectural designs (i.e., renderings) in accurate, representational perspective to show what the project will look like when completed
+        /// </summary>
         Renderer,
 
+        /// <summary>
         /// [rpt] A person or organization who writes or presents reports of news or current events on air or in print
+        /// </summary>
         Reporter,
 
-        /// [rps] An organization that hosts data or material culture objects and provides services to promote long term
+        /// <summary>
+        /// [rps] An organization that hosts data or material culture objects and provides services to promote long term, consistent and shared use of those data or objects
+        /// </summary>
         Repository,
 
+        /// <summary>
         /// [rth] A person who directed or managed a research project
+        /// </summary>
         ResearchTeamHead,
 
+        /// <summary>
         /// [rtm] A person who participated in a research project but whose role did not involve direction or management of it
+        /// </summary>
         ResearchTeamMember,
 
+        /// <summary>
         /// [res] A person or organization responsible for performing research UF Performer of research
+        /// </summary>
         Researcher,
 
+        /// <summary>
         /// [rsp] A person or organization who makes an answer to the courts pursuant to an application for redress (usually in an equity proceeding) or a candidate for a degree who defends or opposes a thesis provided by the praeses in an academic disputation
+        /// </summary>
         Respondent,
 
-        /// [rst] A respondent who takes an appeal from one court or jurisdiction to another to reverse the judgment
+        /// <summary>
+        /// [rst] A respondent who takes an appeal from one court or jurisdiction to another to reverse the judgment, usually in an equity proceeding
+        /// </summary>
         RespondentAppellant,
 
-        /// [rse] A respondent against whom an appeal is taken from one court or jurisdiction to another to reverse the judgment
+        /// <summary>
+        /// [rse] A respondent against whom an appeal is taken from one court or jurisdiction to another to reverse the judgment, usually in an equity proceeding
+        /// </summary>
         RespondentAppellee,
 
+        /// <summary>
         /// [rpy] A person or organization legally responsible for the content of the published material
+        /// </summary>
         ResponsibleParty,
 
-        /// [rsg] A person or organization
+        /// <summary>
+        /// [rsg] A person or organization, other than the original choreographer or director, responsible for restaging a choreographic or dramatic work and who contributes minimal new content
+        /// </summary>
         Restager,
 
-        /// [rsr] A person
+        /// <summary>
+        /// [rsr] A person, family, or organization responsible for the set of technical, editorial, and intellectual procedures aimed at compensating for the degradation of an item by bringing it back to a state as close as possible to its original condition
+        /// </summary>
         Restorationist,
 
-        /// [rev] A person or organization responsible for the review of a book
+        /// <summary>
+        /// [rev] A person or organization responsible for the review of a book, motion picture, performance, etc.
+        /// </summary>
         Reviewer,
 
-        /// [rbr] A person or organization responsible for parts of a work
+        /// <summary>
+        /// [rbr] A person or organization responsible for parts of a work, often headings or opening parts of a manuscript, that appear in a distinctive color, usually red
+        /// </summary>
         Rubricator,
 
-        /// [sce] A person or organization who is the author of a motion picture screenplay
+        /// <summary>
+        /// [sce] A person or organization who is the author of a motion picture screenplay, generally the person who wrote the scenarios for a motion picture during the silent era
+        /// </summary>
         Scenarist,
 
-        /// [sad] A person or organization who brings scientific
+        /// <summary>
+        /// [sad] A person or organization who brings scientific, pedagogical, or historical competence to the conception and realization on a work, particularly in the case of audio-visual items
+        /// </summary>
         ScientificAdvisor,
 
-        /// [aus] An author of a screenplay
+        /// <summary>
+        /// [aus] An author of a screenplay, script, or scene UF Author of screenplay, etc.
+        /// </summary>
         Screenwriter,
 
-        /// [scr] A person who is an amanuensis and for a writer of manuscripts proper. For a person who makes pen-facsimiles
+        /// <summary>
+        /// [scr] A person who is an amanuensis and for a writer of manuscripts proper. For a person who makes pen-facsimiles, use Facsimilist [fac]
+        /// </summary>
         Scribe,
 
-        /// [scl] An artist responsible for creating a three-dimensional work by modeling
+        /// <summary>
+        /// [scl] An artist responsible for creating a three-dimensional work by modeling, carving, or similar technique
+        /// </summary>
         Sculptor,
 
-        /// [spy] A person or organization who is identified as the party of the second part. In the case of transfer of right
+        /// <summary>
+        /// [spy] A person or organization who is identified as the party of the second part. In the case of transfer of right, this is the assignee, transferee, licensee, grantee, etc. Multiple parties can be named jointly as the second party
+        /// </summary>
         SecondParty,
 
-        /// [sec] A person or organization who is a recorder
+        /// <summary>
+        /// [sec] A person or organization who is a recorder, redactor, or other person responsible for expressing the views of a organization
+        /// </summary>
         Secretary,
 
+        /// <summary>
         /// [sll] A former owner of an item who sold that item to another owner
+        /// </summary>
         Seller,
 
-        /// [std] A person who translates the rough sketches of the art director into actual architectural structures for a theatrical presentation
+        /// <summary>
+        /// [std] A person who translates the rough sketches of the art director into actual architectural structures for a theatrical presentation, entertainment, motion picture, etc. Set designers draw the detailed guides and specifications for building the set
+        /// </summary>
         SetDesigner,
 
-        /// [stg] An entity in which the activity or plot of a work takes place
+        /// <summary>
+        /// [stg] An entity in which the activity or plot of a work takes place, e.g. a geographic place, a time period, a building, an event
+        /// </summary>
         Setting,
 
-        /// [sgn] A person whose signature appears without a presentation or other statement indicative of provenance. When there is a presentation statement
+        /// <summary>
+        /// [sgn] A person whose signature appears without a presentation or other statement indicative of provenance. When there is a presentation statement, use Inscriber [ins].
+        /// </summary>
         Signer,
 
-        /// [sng] A performer contributing to a resource by using his/her/their voice
+        /// <summary>
+        /// [sng] A performer contributing to a resource by using his/her/their voice, with or without instrumental accompaniment, to produce music. A singer's performance may or may not include actual words UF Vocalist
+        /// </summary>
         Singer,
 
-        /// [sds] A person who produces and reproduces the sound score (both live and recorded)
+        /// <summary>
+        /// [sds] A person who produces and reproduces the sound score (both live and recorded), the installation of microphones, the setting of sound levels, and the coordination of sources of sound for a production
+        /// </summary>
         SoundDesigner,
 
-        /// [spk] A performer contributing to a resource by speaking words
+        /// <summary>
+        /// [spk] A performer contributing to a resource by speaking words, such as a lecture, speech, etc.
+        /// </summary>
         Speaker,
 
-        /// [spn] A person
+        /// <summary>
+        /// [spn] A person, family, or organization sponsoring some aspect of a resource, e.g., funding research, sponsoring an event UF Sponsoring body
+        /// </summary>
         Sponsor,
 
+        /// <summary>
         /// [sgd] A person or organization contributing to a stage resource through the overall management and supervision of a performance
+        /// </summary>
         StageDirector,
 
-        /// [stm] A person who is in charge of everything that occurs on a performance stage
+        /// <summary>
+        /// [stm] A person who is in charge of everything that occurs on a performance stage, and who acts as chief of all crews and assistant to a director during rehearsals
+        /// </summary>
         StageManager,
 
+        /// <summary>
         /// [stn] An organization responsible for the development or enforcement of a standard
+        /// </summary>
         StandardsBody,
 
+        /// <summary>
         /// [str] A person or organization who creates a new plate for printing by molding or copying another printing surface
+        /// </summary>
         Stereotyper,
 
+        /// <summary>
         /// [stl] A performer contributing to a resource by relaying a creator's original story with dramatic or theatrical interpretation
+        /// </summary>
         Storyteller,
 
-        /// [sht] A person or organization that supports (by allocating facilities
+        /// <summary>
+        /// [sht] A person or organization that supports (by allocating facilities, staff, or other resources) a project, program, meeting, event, data objects, material culture objects, or other entities capable of support UF Host, supporting
+        /// </summary>
         SupportingHost,
 
-        /// [srv] A person
+        /// <summary>
+        /// [srv] A person, family, or organization contributing to a cartographic resource by providing measurements or dimensional relationships for the geographic area represented
+        /// </summary>
         Surveyor,
 
+        /// <summary>
         /// [tch] A performer contributing to a resource by giving instruction or providing a demonstration UF Instructor
+        /// </summary>
         Teacher,
 
-        /// [tcd] A person who is ultimately in charge of scenery
+        /// <summary>
+        /// [tcd] A person who is ultimately in charge of scenery, props, lights and sound for a production
+        /// </summary>
         TechnicalDirector,
 
+        /// <summary>
         /// [tld] A director responsible for the general management and supervision of a television program
+        /// </summary>
         TelevisionDirector,
 
+        /// <summary>
         /// [tlp] A producer responsible for most of the business aspects of a television program
+        /// </summary>
         TelevisionProducer,
 
-        /// [ths] A person under whose supervision a degree candidate develops and presents a thesis
+        /// <summary>
+        /// [ths] A person under whose supervision a degree candidate develops and presents a thesis, mémoire, or text of a dissertation UF Promoter
+        /// </summary>
         ThesisAdvisor,
 
-        /// [trc] A person
+        /// <summary>
+        /// [trc] A person, family, or organization contributing to a resource by changing it from one system of notation to another. For a work transcribed for a different instrument or performing group, see Arranger [arr]. For makers of pen-facsimiles, use Facsimilist [fac]
+        /// </summary>
         Transcriber,
 
-        /// [trl] A person or organization who renders a text from one language into another
+        /// <summary>
+        /// [trl] A person or organization who renders a text from one language into another, or from an older form of a language into the modern form
+        /// </summary>
         Translator,
 
+        /// <summary>
         /// [tyd] A person or organization who designs the type face used in a particular item UF Designer of type
+        /// </summary>
         TypeDesigner,
 
-        /// [tyg] A person or organization primarily responsible for choice and arrangement of type used in an item. If the typographer is also responsible for other aspects of the graphic design of a book (e.g.
+        /// <summary>
+        /// [tyg] A person or organization primarily responsible for choice and arrangement of type used in an item. If the typographer is also responsible for other aspects of the graphic design of a book (e.g., Book designer [bkd]), codes for both functions may be needed
+        /// </summary>
         Typographer,
 
-        /// [uvp] A place where a university that is associated with a resource is located
+        /// <summary>
+        /// [uvp] A place where a university that is associated with a resource is located, for example, a university where an academic dissertation or thesis was presented
+        /// </summary>
         UniversityPlace,
 
-        /// [vdg] A person in charge of a video production
+        /// <summary>
+        /// [vdg] A person in charge of a video production, e.g. the video recording of a stage production as opposed to a commercial motion picture. The videographer may be the camera operator or may supervise one or more camera operators. Do not confuse with cinematographer
+        /// </summary>
         Videographer,
 
-        /// [vac] An actor contributing to a resource by providing the voice for characters in radio and audio productions and for animated characters in moving image works
+        /// <summary>
+        /// [vac] An actor contributing to a resource by providing the voice for characters in radio and audio productions and for animated characters in moving image works, as well as by providing voice overs in radio and television commercials, dubbed resources, etc.
+        /// </summary>
         VoiceActor,
 
+        /// <summary>
         /// [wit] Use for a person who verifies the truthfulness of an event or action. UF Deponent UF Eyewitness UF Observer UF Onlooker UF Testifier
+        /// </summary>
         Witness,
 
+        /// <summary>
         /// [wde] A person or organization who makes prints by cutting the image in relief on the end-grain of a wood block
+        /// </summary>
         WoodEngraver,
 
+        /// <summary>
         /// [wdc] A person or organization who makes prints by cutting the image in relief on the plank side of a wood block
+        /// </summary>
         Woodcutter,
 
+        /// <summary>
         /// [wam] A person or organization who writes significant material which accompanies a sound recording or other audiovisual material
+        /// </summary>
         WriterOfAccompanyingMaterial,
 
-        /// [wac] A person
+        /// <summary>
+        /// [wac] A person, family, or organization contributing to an expression of a work by providing an interpretation or critical explanation of the original work
+        /// </summary>
         WriterOfAddedCommentary,
 
-        /// [wal] A writer of words added to an expression of a musical work. For lyric writing in collaboration with a composer to form an original work
+        /// <summary>
+        /// [wal] A writer of words added to an expression of a musical work. For lyric writing in collaboration with a composer to form an original work, see lyricist
+        /// </summary>
         WriterOfAddedLyrics,
 
-        /// [wat] A person
+        /// <summary>
+        /// [wat] A person, family, or organization contributing to a non-textual resource by providing text for the non-textual work (e.g., writing captions for photographs, descriptions of maps).
+        /// </summary>
         WriterOfAddedText,
 
-        /// [win] A person
+        /// <summary>
+        /// [win] A person, family, or organization contributing to a resource by providing an introduction to the original work
+        /// </summary>
         WriterOfIntroduction,
 
-        /// [wpr] A person
+        /// <summary>
+        /// [wpr] A person, family, or organization contributing to a resource by providing a preface to the original work
+        /// </summary>
         WriterOfPreface,
 
-        /// [wst] A person
+        /// <summary>
+        /// [wst] A person, family, or organization contributing to a resource by providing supplementary textual content (e.g., an introduction, a preface) to the original work
+        /// </summary>
         WriterOfSupplementaryTextualContent,
+
+
     }
 
     public static class Relator
@@ -815,9 +1354,6 @@ namespace Finix.CsUtils.MARC
         {
             switch (rel)
             {
-                case RelatorType.Expert:
-                    return "exp";
-
                 case RelatorType.Abridger:
                     return "abr";
 
@@ -1147,6 +1683,9 @@ namespace Finix.CsUtils.MARC
 
                 case RelatorType.EventPlace:
                     return "evp";
+
+                case RelatorType.Expert:
+                    return "exp";
 
                 case RelatorType.Facsimilist:
                     return "fac";
@@ -1628,9 +2167,6 @@ namespace Finix.CsUtils.MARC
         {
             switch (rel)
             {
-                case "exp":
-                    return RelatorType.Expert;
-
                 case "abr":
                     return RelatorType.Abridger;
 
@@ -1960,6 +2496,9 @@ namespace Finix.CsUtils.MARC
 
                 case "evp":
                     return RelatorType.EventPlace;
+
+                case "exp":
+                    return RelatorType.Expert;
 
                 case "fac":
                     return RelatorType.Facsimilist;

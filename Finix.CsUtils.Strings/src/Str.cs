@@ -61,8 +61,8 @@ namespace Finix.CsUtils
         /// <summary>
         /// Enumerate a string's words.
         ///
-        /// Words a separated by punctuation and whitespace, but not by digits, or separators (eg. dashes).
-        /// Additionally, words are broken when an upper-case letter follows an upper case one.
+        /// Words a separated by punctuation, whitespace, and symbols (eg. dashes).
+        /// Additionally, words are broken when a lower-case letter follows an upper case one.
         /// </summary>
         /// <param name="text"></param>
         /// <param name="includePunctuation">Include punctuation in the output.</param>
@@ -246,38 +246,6 @@ namespace Finix.CsUtils
                 }
 
                 part += c;
-
-                // switch (c)
-                // {
-                //     case '\\':
-                //         escapeNext = true;
-                //         break;
-
-                //     case '\'' when escapeChar == '\0':
-                //         escapeChar = '\'';
-                //         break;
-
-                //     case '\'' when escapeChar == '\'':
-                //         escapeChar = '\0';
-                //         break;
-
-                //     case '"' when escapeChar == '\0':
-                //         escapeChar = '"';
-                //         break;
-
-                //     case '"' when escapeChar == '"':
-                //         escapeChar = '\0';
-                //         break;
-
-                //     case ' ' when escapeChar == '\0':
-                //         yield return part;
-                //         part = String.Empty;
-                //         break;
-
-                //     default:
-                //         part += c;
-                //         break;
-                // }
             }
 
             yield return part;
@@ -287,7 +255,7 @@ namespace Finix.CsUtils
         {
             return Split(
                 text.EnumerateRunes(),
-                new[] { (Rune) ' ', (Rune) '\r', (Rune) '\n' },
+                Runes.BreakableWhiteSpace.ToArray(),
                 new[] { (Rune) '\\' },
                 new[] { ((Rune) '"', (Rune) '"'), ((Rune) '\'', (Rune) '\'') }
             );
@@ -347,8 +315,11 @@ namespace Finix.CsUtils
             if (String.IsNullOrWhiteSpace(val))
                 return String.Empty;
 
-            val.Replace("\n\r", " ");
-            val.Replace("\n", " ");
+            if (collapseNewlines)
+            {
+                val.Replace("\n\r", " ");
+                val.Replace("\n", " ");
+            }
 
             var len = val.Length;
 

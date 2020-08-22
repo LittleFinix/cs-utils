@@ -9,7 +9,7 @@ namespace Finix.CsUtils
     /// <summary>
     /// Contains a list of UTF8 Runes categorized by type.
     /// </summary>
-    static class Runes
+    public static class Runes
     {
         // ! Please keep these ordered by ascending code-point, per category.
 
