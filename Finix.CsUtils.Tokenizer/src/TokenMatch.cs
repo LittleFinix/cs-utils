@@ -84,7 +84,7 @@ namespace Finix.CsUtils
 
         public override string ToString()
         {
-            return $"[{Token}: " + String.Join(' ', Combine().Select(b => $"{b,2:X}")) + "]";
+            return $"[{Token}: " + String.Join(' ', Combine().Select(b => $"{b:X2}")) + "]";
         }
     }
 }

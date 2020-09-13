@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Text;
+using System.Linq;
 using System.Numerics;
 using System.Diagnostics;
 using System.Buffers;
@@ -30,13 +31,18 @@ namespace Finix.CsUtils
             Match = match.ToArray();
         }
 
+        public StaticToken(string str)
+        {
+            Match = Encoding.UTF8.GetBytes(str);
+        }
+
         public override string GetSyntax()
         {
-            var match = new BigInteger(Match.Span);
+            var match = new BigInteger(Match.Span, true);
 
             unchecked
             {
-                if (Char.IsLetterOrDigit((char) match))
+                if (Char.IsLetterOrDigit((char) match) || Char.IsSymbol((char) match))
                     return $"{(char) match}";
             }
 
@@ -45,7 +51,6 @@ namespace Finix.CsUtils
 
         protected override bool TryMatchInternal(ReadOnlySpan<byte> bytes, out int tokenEnd, ICollection<TokenMatch>? values = null)
         {
-
             tokenEnd = 0;
 
             if (bytes.Length < Match.Length || !bytes[..Match.Length].SequenceEqual(Match.Span))
@@ -59,12 +64,9 @@ namespace Finix.CsUtils
             return true;
         }
 
-        public static Token Invariant(char c)
+        public static implicit operator StaticToken(string str)
         {
-            return new CombinedToken {
-                new StaticToken(Char.ToUpperInvariant(c)),
-                new StaticToken(Char.ToLowerInvariant(c)),
-            };
+            return new StaticToken(str);
         }
 
         public static implicit operator StaticToken(char c)

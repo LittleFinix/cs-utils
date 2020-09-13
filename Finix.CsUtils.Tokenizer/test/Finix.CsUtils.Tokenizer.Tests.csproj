@@ -17,4 +17,8 @@
     <ProjectReference Include="..\src\Finix.CsUtils.Tokenizer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="example.vcf" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

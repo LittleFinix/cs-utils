@@ -30,7 +30,10 @@ namespace Finix.CsUtils
             foreach (var token in Tokens)
             {
                 if (!token.TryMatch(bytes[tokenEnd..], out var tend, out var match, values == null))
+                {
+                    tokenEnd += tend;
                     return false;
+                }
 
                 if (match != null)
                     values?.Add(match);

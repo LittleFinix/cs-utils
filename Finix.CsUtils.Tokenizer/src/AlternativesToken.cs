@@ -25,12 +25,16 @@ namespace Finix.CsUtils
 
         protected override bool TryMatchInternal(ReadOnlySpan<byte> bytes, out int tokenEnd, ICollection<TokenMatch>? values = null)
         {
-
             tokenEnd = 0;
+
             foreach (var token in Tokens)
             {
+                tokenEnd = 0;
                 if (token.TryMatch(bytes, out tokenEnd, out var match, values == null))
                 {
+                    if (tokenEnd == 0)
+                        continue;
+
                     if (match != null)
                         values?.Add(match);
 

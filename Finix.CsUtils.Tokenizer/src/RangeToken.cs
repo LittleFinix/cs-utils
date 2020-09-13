@@ -33,8 +33,8 @@ namespace Finix.CsUtils
 
         public override string GetSyntax()
         {
-            var low = new BigInteger(Low.Span);
-            var high = new BigInteger(High.Span);
+            var low = new BigInteger(Low.Span, true);
+            var high = new BigInteger(High.Span, true);
 
             unchecked
             {
@@ -47,7 +47,6 @@ namespace Finix.CsUtils
 
         protected override bool TryMatchInternal(ReadOnlySpan<byte> bytes, out int tokenEnd, ICollection<TokenMatch>? values = null)
         {
-
             tokenEnd = 0;
 
             if (bytes.Length < Low.Length)

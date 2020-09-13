@@ -11,7 +11,7 @@ namespace Finix.CsUtils
         public RepeatingToken(Token baseToken, int min = 0, int max = Int32.MaxValue, bool combine = false)
         {
             BaseToken = baseToken;
-            Min = min > 0 ? min : 1;
+            Min = min; // > 0 ? min : 1;
             Max = max;
             Combine = combine;
         }

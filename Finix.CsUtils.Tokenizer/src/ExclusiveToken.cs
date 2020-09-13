@@ -32,7 +32,7 @@ namespace Finix.CsUtils
 
             if (!inc || exc)
             {
-                tokenEnd = 0;
+                // tokenEnd = 0;
                 return false;
             }
 
