@@ -320,6 +320,31 @@ namespace Finix.CsUtils
             return new RangeToken(low, high);
         }
 
+        public static Token R(Token token, byte replace)
+        {
+            return new ReplaceToken(token, new[] { replace });
+        }
+
+        public static Token R(Token token, byte[] replace)
+        {
+            return new ReplaceToken(token, replace);
+        }
+
+        public static Token R(Token token, string replace)
+        {
+            return new ReplaceToken(token, Encoding.UTF8.GetBytes(replace));
+        }
+
+        public static Token R(Token token, char replace)
+        {
+            return R(token, replace.ToString());
+        }
+
+        public static Token R(Token token, Func<TokenMatch, byte[]> replace)
+        {
+            return new ReplaceToken(token, replace);
+        }
+
         public static implicit operator Token(string str)
         {
             return new StaticToken(str);

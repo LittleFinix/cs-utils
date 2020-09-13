@@ -45,7 +45,8 @@ namespace Finix.CsUtils.Tokenizer.Tests
             (EscapeChar + '\\') /
             (EscapeChar + ';') /
             (EscapeChar + ',') /
-            (EscapeChar + ':')
+            (EscapeChar + ':') /
+            R(EscapeChar + 'n', '\n')
         )
             .Named("EscapedChar");
 
