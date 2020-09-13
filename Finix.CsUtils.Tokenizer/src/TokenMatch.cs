@@ -83,13 +83,33 @@ namespace Finix.CsUtils
             return Bytes ?? SubMatches.SelectMany(m => m.Combine()).ToArray();
         }
 
+        public string AsString(Encoding? encoder = null)
+        {
+            encoder ??= Encoding.UTF8;
+
+            return encoder.GetString(Combine());
+        }
+
+        public IEnumerable<TokenMatch> Find(string tokenName)
+        {
+            return SubMatches.Where(m => m.Token.Name == tokenName);
+        }
+
+        public IEnumerable<TokenMatch> Find(Token token)
+        {
+            if (token.Name == null)
+                return Enumerable.Empty<TokenMatch>();
+
+            return Find(token.Name);
+        }
+
         public override string ToString()
         {
             var bytes = Combine();
             var text = String.Join(' ', bytes.Select(b => b.ToString("X2")));
 
             if (bytes.All(c => !Char.IsControl((char) c)))
-                text = '"' + Encoding.UTF8.GetString(bytes).Replace("\n", "\\n").Replace("\r", "\\r") + '"';
+                text = '"' + AsString() + '"'; // Encoding.UTF8.GetString(bytes).Replace("\n", "\\n").Replace("\r", "\\r")
 
 
             return $"[{Token}: " + text + "]";

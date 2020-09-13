@@ -20,7 +20,7 @@ namespace Finix.CsUtils.Tokenizer.Tests
             .Combined()
             .Named("Word");
 
-        private static readonly Token SentenceParser = (1 * ((Word / !AWSP)))
+        private static readonly Token SentenceParser = (1 * (Word / !AWSP))
             .Combined()
             .Named("Sentence");
 
