@@ -9,9 +9,13 @@ namespace Finix.CsUtils
 {
     public abstract class MultiToken : Token, IEnumerable<Token>
     {
-        private readonly List<Token> tokens;
+        private List<Token> tokens;
 
-        public IReadOnlyCollection<Token> Tokens => tokens.AsReadOnly();
+        public IReadOnlyCollection<Token> Tokens
+        {
+            get => tokens.AsReadOnly();
+            internal set => tokens = new List<Token>(value);
+        }
 
         public MultiToken(IEnumerable<Token> tokens)
         {

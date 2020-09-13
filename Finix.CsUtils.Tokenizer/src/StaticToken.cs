@@ -49,7 +49,7 @@ namespace Finix.CsUtils
             return $"%x{match:X}";
         }
 
-        protected override bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status)
+        internal override bool TryMatchInternal(PartialExecutionData data, ref SequenceReader<byte> reader, out OperationStatus status)
         {
             if (reader.Remaining < Match.Length)
                 return DoneWith(status = OperationStatus.NeedMoreData);
@@ -57,13 +57,7 @@ namespace Finix.CsUtils
             if (!reader.IsNext(Match.Span))
                 return DoneWith(status = OperationStatus.InvalidData);
 
-            var data = new byte[Match.Length];
-
-            if (values != null && reader.TryCopyTo(data.AsSpan()))
-                values.Add(new TokenMatch(this, data));
-
-            reader.Advance(data.LongLength);
-
+            data.AddData(this, ref reader, Match.Length);
             return DoneWith(status = OperationStatus.Done);
         }
 

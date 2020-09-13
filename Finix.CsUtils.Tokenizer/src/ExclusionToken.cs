@@ -6,9 +6,9 @@ using System;
 
 namespace Finix.CsUtils
 {
-    public sealed class ExclusiveToken : Token
+    public sealed class ExclusionToken : Token
     {
-        public ExclusiveToken(Token include, Token exclude)
+        public ExclusionToken(Token include, Token exclude)
         {
             Include = include;
             Exclude = exclude;
@@ -23,16 +23,17 @@ namespace Finix.CsUtils
             return $"( {Include} - {Exclude} )";
         }
 
-        protected override bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status)
+        internal override bool TryMatchInternal(PartialExecutionData data, ref SequenceReader<byte> reader, out OperationStatus status)
         {
             var at = reader.Consumed;
             var tempReader = reader;
 
-            var inc = Include.TryMatch(ref reader, out var match, values == null, out status);
+            data.ClearData();
+            var inc = Include.TryMatch(data.GetIndexed(0), ref reader, out var match, out status);
 
             if (inc)
             {
-                if (Exclude.TryMatch(ref tempReader, out _, true, out var tempStatus))
+                if (Exclude.TryMatch(data.GetIndexed(1, true, true), ref tempReader, out _, out var tempStatus))
                 {
                     status = tempStatus;
                     reader = tempReader;
@@ -44,8 +45,7 @@ namespace Finix.CsUtils
                 return false;
             }
 
-            if (match != null)
-                values?.Add(match);
+            data.AddMatch(0, match);
 
             return true;
         }

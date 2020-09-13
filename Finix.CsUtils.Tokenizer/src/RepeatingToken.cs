@@ -30,24 +30,24 @@ namespace Finix.CsUtils
             return $"{min}*{max}({BaseToken})";
         }
 
-        protected override bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status)
+        internal override bool TryMatchInternal(PartialExecutionData data, ref SequenceReader<byte> reader, out OperationStatus status)
         {
+            if (data.Index > Max)
+                throw new IndexOutOfRangeException("Index must be less than or equal to Max");
+
             status = OperationStatus.Done;
 
-            var i = 0;
-            var tempReader = reader;
-            for (; i < Max; i++)
+            for (; data.Index <= Max; data.Index++)
             {
                 var at = reader.Consumed;
-                if (!BaseToken.TryMatch(ref reader, out var match, values == null, out status) || reader.Consumed == at)
+                if (!BaseToken.TryMatch(data.GetIndexed(data.Index, revokeAuthority: data.Index >= Min), ref reader, out var match, out status) || reader.Consumed == at)
                     goto end;
 
-                if (match != null)
-                    values?.Add(match);
+                data.AddMatch(data.Index, match);
             }
 
         end:
-            if (i < Min && status == OperationStatus.Done)
+            if (data.Index < Min && status == OperationStatus.Done)
             {
                 status = OperationStatus.NeedMoreData;
                 return false;

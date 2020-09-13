@@ -20,9 +20,9 @@ namespace Finix.CsUtils
 
         public Token BaseToken { get; }
 
-        protected override bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status)
+        internal override bool TryMatchInternal(PartialExecutionData data, ref SequenceReader<byte> reader, out OperationStatus status)
         {
-            return BaseToken.TryMatch(ref reader, out _, true, out status);
+            return BaseToken.TryMatch(data.GetIndexed(0, true), ref reader, out _, out status);
         }
 
         public override string GetName()

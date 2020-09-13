@@ -23,19 +23,25 @@ namespace Finix.CsUtils
             return "( " + String.Join(" + ", Tokens.Select(t => t.ToString())) + " )";
         }
 
-        protected override bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status)
+        internal override bool TryMatchInternal(PartialExecutionData data, ref SequenceReader<byte> reader, out OperationStatus status)
         {
             status = OperationStatus.Done;
 
-            foreach (var token in Tokens)
+            data.ClearData(data.Index);
+            foreach (var token in Tokens.Skip(data.Index))
             {
-                if (!token.TryMatch(ref reader, out var match, values == null, out status))
+                if (!token.TryMatch(data.GetIndexed(data.Index), ref reader, out var match, out status))
                 {
+                    data.Index--;
                     return false;
                 }
 
-                if (match != null)
-                    values?.Add(match);
+                data.AddMatch(data.Index, match);
+
+                // if (status == OperationStatus.NeedMoreData)
+                //     return true;
+
+                data.Index++;
             }
 
             return true;

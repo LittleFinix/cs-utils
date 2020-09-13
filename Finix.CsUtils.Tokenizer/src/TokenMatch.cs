@@ -89,7 +89,7 @@ namespace Finix.CsUtils
             var text = String.Join(' ', bytes.Select(b => b.ToString("X2")));
 
             if (bytes.All(c => !Char.IsControl((char) c)))
-                text = Encoding.UTF8.GetString(bytes).Replace("\n", "\\n");
+                text = '"' + Encoding.UTF8.GetString(bytes).Replace("\n", "\\n").Replace("\r", "\\r") + '"';
 
 
             return $"[{Token}: " + text + "]";

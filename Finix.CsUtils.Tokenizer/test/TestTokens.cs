@@ -39,6 +39,16 @@ namespace Finix.CsUtils.Tokenizer.Tests
             PrintMatch(match);
         }
 
+        public static readonly Token EscapeChar = !T('\\');
+
+        public static readonly Token EscapedChar = (
+            (EscapeChar + '\\') /
+            (EscapeChar + ';') /
+            (EscapeChar + ',') /
+            (EscapeChar + ':')
+        )
+            .Named("EscapedChar");
+
         public static readonly Token Name = (
             1 * (ALPHA / DIGIT / '-')
         )
@@ -54,32 +64,38 @@ namespace Finix.CsUtils.Tokenizer.Tests
         public static readonly Token NonAscii = (
            UTF8_2 / UTF8_3 / UTF8_4
         )
+            // .Debugging()
             .Named("NonAscii");
 
         public static readonly Token QSafeChar = (
-            WSP / T(0x23, 0x7E) / '!' / NonAscii
+            WSP / (T(0x23, 0x7E) - EscapedChar) / '!' / NonAscii / EscapedChar
         )
+            // .Debugging()
             .Named("QSafeChar");
 
         public static readonly Token SafeChar = (
-            WSP / (T(0x23, 0x39) - ',') / T(0x3C, 0x7E) / '!' / NonAscii
+            WSP / (T(0x23, 0x39) - ',' / EscapedChar) / T(0x3C, 0x7E) / '!' / NonAscii / EscapedChar
         )
+            // .Debugging()
             .Named("SafeChar");
 
         public static readonly Token ValueChar = (
-            ((WSP / VCHAR / NonAscii) - ';') / ('\\' + ';')
+            (WSP / VCHAR / NonAscii - ';') / EscapedChar
         )
+            // .Debugging()
             .Named("ValueChar");
 
         public static readonly Token ParamValue = (
-            (0 * SafeChar) / (0 * (!DQUOTE + 0 * QSafeChar + !DQUOTE))
+            0 * SafeChar / (0 * (!DQUOTE + 0 * QSafeChar + !DQUOTE))
         )
+            .Authoritative()
             .Combined()
             .Named("ParamValue");
 
         public static readonly Token Value = (
             0 * (ValueChar / !LWSP)
         )
+            .Authoritative()
             .Combined()
             .Named("Value");
 
@@ -90,7 +106,9 @@ namespace Finix.CsUtils.Tokenizer.Tests
             .Named("Param");
 
         public static readonly Token ContentLine = (
-            Group + (Name - I("END") / I("VERSION")) + 0 * (!T(';') + Param) + !T(':') + Value + 0 * (!T(';') + Value) + !CRLF
+            Group + (Name - I("END") / I("VERSION")) +
+            0 * (!T(';') + Param.Authoritative()) + !T(':') +
+            (Value + 0 * (!T(';') + Value) + !CRLF).Authoritative()
         )
             .Combined()
             .Named("ContentLine");
@@ -102,10 +120,14 @@ namespace Finix.CsUtils.Tokenizer.Tests
             .Named("Version");
 
         public static readonly Token VCard = (
-            !(I("BEGIN:VCARD") + CRLF) +
-            !I("VERSION:") + Version + !CRLF +
+            (
+                !(I("BEGIN:VCARD") + CRLF) +
+                !I("VERSION:") + Version + !CRLF
+            ).Authoritative() +
+
             1 * ContentLine +
-            !(I("END:VCARD") + CRLF)
+
+            !(I("END:VCARD") + CRLF).Authoritative()
         )
             .Combined()
             .Named("VCard");
@@ -116,15 +138,37 @@ namespace Finix.CsUtils.Tokenizer.Tests
             var vcard = File.ReadAllBytes("example.vcf");
             var test = @"LABEL=""42 Plantation St.\nBaytown\, LA 30314\nUnited States of America""";
 
-            Assert.Throws<FormatException>(() => SafeChar.Execute(new[] { (byte) '"' }, out _, out _));
+            // Assert.Throws<FormatException>(() => SafeChar.Execute(new[] { (byte) '"' }, out _, out _));
 
-            Assert.True(Param.Execute(Encoding.UTF8.GetBytes(test), out _, out var status));
+            TokenMatch match;
+
+            Assert.True(Param.Execute(Encoding.UTF8.GetBytes(test), out match, out var status));
             Assert.Equal(OperationStatus.NeedMoreData, status);
 
-
-            Assert.True(VCard.Execute(vcard, out var match, out _));
-
             PrintMatch(match);
+
+            Assert.True(VCard.Execute(vcard, out match, out _));
+            PrintMatch(match);
+
+            // var s = 0;
+            // var e = 5;
+            // var obj = new object();
+
+            // while (true)
+            // {
+            //     var seq = new ReadOnlySequence<byte>(vcard[s..(s + Math.Min(vcard.Length - s, e))]);
+            //     var reader = new SequenceReader<byte>(seq);
+
+            //     if (!VCard.ExecutePartial(ref reader, out match, out status, ref obj))
+            //         break;
+
+            //     if (reader.Consumed == 0)
+            //         e++;
+
+            //     s += (int) reader.Consumed;
+            // }
+
+            // PrintMatch(match);
         }
 
         private void PrintMatch(TokenMatch match, string prefix = "")

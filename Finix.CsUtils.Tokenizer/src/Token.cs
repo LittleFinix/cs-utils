@@ -10,7 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Finix.CsUtils
 {
-    public abstract class Token
+    public abstract class Token : ICloneable
     {
         public static readonly Token ALPHA = (T(0x41, 0x5A) / T(0x61, 0x7A)).Named("ALPHA");
 
@@ -79,6 +79,10 @@ namespace Finix.CsUtils
 
         public bool Combine { get; set; }
 
+        public bool Debug { get; set; } = false;
+
+        public bool IsAuthoritative { get; set; } = false;
+
         // public bool DiscardValue { get; set; } = true;
 
         protected bool DoneWith(OperationStatus status)
@@ -86,94 +90,99 @@ namespace Finix.CsUtils
             return status == OperationStatus.Done;
         }
 
-        protected abstract bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status);
+        internal abstract bool TryMatchInternal(PartialExecutionData ped, ref SequenceReader<byte> reader, out OperationStatus status);
 
-        public bool TryMatch(ref SequenceReader<byte> reader, [MaybeNullWhen(false)] out TokenMatch match, bool ignoreMatch, out OperationStatus status)
+        internal bool TryMatch(PartialExecutionData data, ref SequenceReader<byte> reader, [MaybeNullWhen(false)] out TokenMatch match, out OperationStatus status)
         {
-#if DEBUG
+#if TRACE
             var seq = reader.Sequence.Slice(reader.Consumed);
 #endif
 
-            Debug.Indent();
-            Debug.WriteLine($"Running {this} on {Encoding.UTF8.GetString(seq.ToArray()).Replace("\n", "\\n")}");
+            Trace.Indent();
+            Trace.WriteLineIf(Debug, $"Running {this} on {new TokenMatch(this, seq.ToArray())}");
 
-            var at = reader.Consumed;
+            data.Authoritative |= IsAuthoritative;
+
+            if (data.AuthoritativeSource == null || IsAuthoritative)
+                data.AuthoritativeSource = this;
+
             var tempReader = reader;
-
-            var list = ignoreMatch ? null : new List<TokenMatch>();
-            var ok = TryMatchInternal(ref tempReader, list, out status);
+            var ok = TryMatchInternal(data, ref tempReader, out status);
 
             if (ok)
                 reader = tempReader;
+            else if (data.Authoritative)
+                ThrowParsingException(tempReader, data.AuthoritativeSource);
 
-            if (ok && list != null)
+            if (ok && data.Matches is IEnumerable<TokenMatch> list)
             {
                 match = new TokenMatch(this, list);
 
                 if (Combine)
                     match = match.Collapse();
 
-                Debug.WriteLine($"Matched {this}: {match}");
+                Trace.WriteLineIf(Debug, $"Matched {this}: {match}");
             }
             else
             {
                 match = null;
             }
 
-            Debug.WriteLine($"Running {this}: {status} (ok: {ok})");
-            Debug.Unindent();
+            Trace.WriteLineIf(Debug, $"Running {this}: {status} (ok: {ok})");
+            Trace.Unindent();
 
             return ok;
         }
 
-        public bool Execute(ref SequenceReader<byte> reader, out TokenMatch match, out OperationStatus status)
+        public bool Execute(ref SequenceReader<byte> reader, out TokenMatch? match, out OperationStatus status)
         {
-            var start = reader.Position;
+            var ped = new object();
             var tempReader = reader;
 
-            if (!TryMatch(ref reader, out var preMatch, false, out status) && status != OperationStatus.NeedMoreData)
-            {
-                var end = reader.Consumed;
-                var line = 1;
-                var col = 1;
+            var ok = ExecutePartial(ref reader, out match, out status, ref ped);
 
-                while (tempReader.TryRead(out var b))
-                {
-                    if (end-- <= 0)
-                        break;
+            if (status == OperationStatus.Done)
+                ok = true;
 
-                    col++;
+            if (!ok)
+                reader = tempReader;
 
-                    if (b == '\n')
-                    {
-                        line++;
-                        col = 1;
-                    }
-                }
+            // match = preMatch ?? throw new NullReferenceException($"The execution succeeded but failed to return a TokenMatch.");
 
-                throw new FormatException($"Parsing failed on line {line} column {col}.");
-            }
-
-            if (preMatch == null)
-                throw new NullReferenceException($"The execution succeeded but failed to return a TokenMatch.");
-
-            match = preMatch;
-
-            return true;
+            return ok;
         }
 
-        public bool Execute(ReadOnlySequence<byte> bytes, out TokenMatch match, out OperationStatus status)
+        public bool Execute(ReadOnlySequence<byte> bytes, out TokenMatch? match, out OperationStatus status)
         {
             var sr = new SequenceReader<byte>(bytes);
 
             return Execute(ref sr, out match, out status);
         }
 
-        public bool Execute(byte[] bytes, out TokenMatch match, out OperationStatus status)
+        public bool Execute(byte[] bytes, out TokenMatch? match, out OperationStatus status)
         {
             var seq = new ReadOnlySequence<byte>(bytes);
 
             return Execute(seq, out match, out status);
+        }
+
+        internal bool ExecutePartial(ref SequenceReader<byte> reader, out TokenMatch? match, out OperationStatus status, ref object? partialData)
+        {
+            if (!(partialData is PartialExecutionData ped))
+                partialData = ped = new PartialExecutionData();
+
+            var start = reader.Position;
+            var tempReader = reader;
+
+            if (!TryMatch(ped, ref reader, out match, out status) && status != OperationStatus.NeedMoreData)
+            {
+                var errReader = reader;
+                reader = tempReader;
+
+                ThrowParsingException(errReader);
+            }
+
+            return status == OperationStatus.NeedMoreData;
         }
 
         public Token Named(string name)
@@ -186,6 +195,94 @@ namespace Finix.CsUtils
         {
             Combine = combined;
             return this;
+        }
+
+        public Token Debugging(bool enabled = true, bool recurse = false)
+        {
+            var n = (Token) Clone();
+            n.Debug = enabled;
+
+            if (recurse && n is MultiToken mt)
+            {
+                mt.Tokens = mt.Tokens
+                    .Select(t => t.Debugging(enabled, recurse))
+                    .ToArray();
+            }
+
+            return n;
+        }
+
+        public Token Authoritative(bool enable = true)
+        {
+            IsAuthoritative = enable;
+            return this;
+        }
+
+        public virtual string GetName()
+        {
+            return Name ?? GetType().Name;
+        }
+
+        public abstract string GetSyntax();
+
+        public override string ToString()
+        {
+            return ToString("G");
+        }
+
+        public virtual string ToString(string? format)
+        {
+            switch (format?.ToUpperInvariant())
+            {
+                case "N":
+                    return GetName();
+
+                case "S":
+                    return GetSyntax();
+
+                case "NS":
+                case "G":
+                case "":
+                case null:
+                    return Name ?? GetSyntax();
+
+                default:
+                    throw new ArgumentException($"Unknown format: {format}");
+            }
+        }
+
+        public virtual object Clone()
+        {
+            return MemberwiseClone();
+        }
+
+        [DoesNotReturn]
+        private static void ThrowParsingException(SequenceReader<byte> reader, Token? authoritativeSource = null)
+        {
+            var end = reader.Consumed;
+            var line = 1;
+            var col = 1;
+
+            reader.Rewind(end);
+
+            while (reader.TryRead(out var b))
+            {
+                if (end-- <= 0)
+                    break;
+
+                col++;
+
+                if (b == '\n')
+                {
+                    line++;
+                    col = 1;
+                }
+            }
+
+            if (authoritativeSource != null)
+                throw new FormatException($"Parsing failed on line {line} column {col}, expected '{authoritativeSource}'.");
+            else
+                throw new FormatException($"Parsing failed on line {line} column {col}.");
         }
 
         public static Token I(char c)
@@ -270,7 +367,7 @@ namespace Finix.CsUtils
 
         public static Token operator -(Token lhs, Token rhs)
         {
-            return new ExclusiveToken(lhs, rhs);
+            return new ExclusionToken(lhs, rhs);
         }
 
         public static Token operator !(Token t)
@@ -280,38 +377,6 @@ namespace Finix.CsUtils
             // clone.DiscardValue = false;
 
             // return clone;
-        }
-
-        public virtual string GetName()
-        {
-            return Name ?? GetType().Name;
-        }
-
-        public abstract string GetSyntax();
-
-        public override string ToString()
-        {
-            return ToString("G");
-        }
-
-        public virtual string ToString(string? format)
-        {
-            switch (format?.ToUpperInvariant())
-            {
-                case "N":
-                    return GetName();
-
-                case "S":
-                    return GetSyntax();
-
-                case "NS":
-                case "G":
-                case null:
-                    return Name ?? GetSyntax();
-
-                default:
-                    throw new ArgumentException($"Unknown format: {format}");
-            }
         }
     }
 }

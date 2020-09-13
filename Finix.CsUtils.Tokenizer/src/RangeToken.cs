@@ -45,17 +45,12 @@ namespace Finix.CsUtils
             return $"%x{low:X}-{high:X}";
         }
 
-        protected override bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status)
+        internal override bool TryMatchInternal(PartialExecutionData data, ref SequenceReader<byte> reader, out OperationStatus status)
         {
             if (reader.Remaining < Low.Length)
                 return DoneWith(status = OperationStatus.NeedMoreData);
 
-            var value = new byte[Low.Length];
-
-            if (!reader.TryCopyTo(value))
-                return DoneWith(status = OperationStatus.DestinationTooSmall);
-
-            reader.Advance(value.LongLength);
+            var value = data.ReadData(ref reader, Low.Length);
 
             var lo = Low.Span.SequenceCompareTo(value);
             var hi = High.Span.SequenceCompareTo(value);
@@ -63,8 +58,7 @@ namespace Finix.CsUtils
             if (lo > 0 || hi < 0)
                 return DoneWith(status = OperationStatus.InvalidData);
 
-            if (values != null)
-                values.Add(new TokenMatch(this, value));
+            data.AddData(this, value);
 
             return DoneWith(status = OperationStatus.Done);
         }
