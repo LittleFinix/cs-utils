@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+﻿using System.Text;
+using System.Buffers;
 using System.Collections.Generic;
 using System;
 using System.Linq;
@@ -84,7 +85,14 @@ namespace Finix.CsUtils
 
         public override string ToString()
         {
-            return $"[{Token}: " + String.Join(' ', Combine().Select(b => $"{b:X2}")) + "]";
+            var bytes = Combine();
+            var text = String.Join(' ', bytes.Select(b => b.ToString("X2")));
+
+            if (bytes.All(c => !Char.IsControl((char) c)))
+                text = Encoding.UTF8.GetString(bytes).Replace("\n", "\\n");
+
+
+            return $"[{Token}: " + text + "]";
         }
     }
 }

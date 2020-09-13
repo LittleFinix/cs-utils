@@ -5,7 +5,7 @@ using System;
 
 namespace Finix.CsUtils
 {
-    public sealed class IgnoreToken : Token
+    public sealed class SilentToken : Token
     {
         public override string? Name
         {
@@ -13,16 +13,16 @@ namespace Finix.CsUtils
             set => BaseToken.Name = value;
         }
 
-        public IgnoreToken(Token baseToken)
+        public SilentToken(Token baseToken)
         {
             BaseToken = baseToken;
         }
 
         public Token BaseToken { get; }
 
-        protected override bool TryMatchInternal(ReadOnlySpan<byte> bytes, out int tokenEnd, ICollection<TokenMatch>? values = null)
+        protected override bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status)
         {
-            return BaseToken.TryMatch(bytes, out tokenEnd, out _, true);
+            return BaseToken.TryMatch(ref reader, out _, true, out status);
         }
 
         public override string GetName()

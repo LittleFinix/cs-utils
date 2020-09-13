@@ -30,24 +30,35 @@ namespace Finix.CsUtils
             return $"{min}*{max}({BaseToken})";
         }
 
-        protected override bool TryMatchInternal(ReadOnlySpan<byte> bytes, out int tokenEnd, ICollection<TokenMatch>? values = null)
+        protected override bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status)
         {
-            tokenEnd = 0;
+            status = OperationStatus.Done;
 
             var i = 0;
+            var tempReader = reader;
             for (; i < Max; i++)
             {
-                if (!BaseToken.TryMatch(bytes[tokenEnd..], out var token, out var match, values == null) || token == 0)
+                var at = reader.Consumed;
+                if (!BaseToken.TryMatch(ref reader, out var match, values == null, out status) || reader.Consumed == at)
                     goto end;
 
                 if (match != null)
                     values?.Add(match);
-
-                tokenEnd += token;
             }
 
         end:
-            return i >= Min;
+            if (i < Min && status == OperationStatus.Done)
+            {
+                status = OperationStatus.NeedMoreData;
+                return false;
+            }
+            else
+            {
+                if (status != OperationStatus.NeedMoreData)
+                    status = OperationStatus.Done;
+
+                return true;
+            }
         }
     }
 }

@@ -23,22 +23,19 @@ namespace Finix.CsUtils
             return "( " + String.Join(" + ", Tokens.Select(t => t.ToString())) + " )";
         }
 
-        protected override bool TryMatchInternal(ReadOnlySpan<byte> bytes, out int tokenEnd, ICollection<TokenMatch>? values = null)
+        protected override bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status)
         {
-            tokenEnd = 0;
+            status = OperationStatus.Done;
 
             foreach (var token in Tokens)
             {
-                if (!token.TryMatch(bytes[tokenEnd..], out var tend, out var match, values == null))
+                if (!token.TryMatch(ref reader, out var match, values == null, out status))
                 {
-                    tokenEnd += tend;
                     return false;
                 }
 
                 if (match != null)
                     values?.Add(match);
-
-                tokenEnd += tend;
             }
 
             return true;

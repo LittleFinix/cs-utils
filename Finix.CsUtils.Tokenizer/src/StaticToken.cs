@@ -49,19 +49,22 @@ namespace Finix.CsUtils
             return $"%x{match:X}";
         }
 
-        protected override bool TryMatchInternal(ReadOnlySpan<byte> bytes, out int tokenEnd, ICollection<TokenMatch>? values = null)
+        protected override bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status)
         {
-            tokenEnd = 0;
+            if (reader.Remaining < Match.Length)
+                return DoneWith(status = OperationStatus.NeedMoreData);
 
-            if (bytes.Length < Match.Length || !bytes[..Match.Length].SequenceEqual(Match.Span))
-                return false;
+            if (!reader.IsNext(Match.Span))
+                return DoneWith(status = OperationStatus.InvalidData);
 
-            tokenEnd = Match.Length;
+            var data = new byte[Match.Length];
 
-            if (values != null)
-                values.Add(new TokenMatch(this, bytes[..tokenEnd]));
+            if (values != null && reader.TryCopyTo(data.AsSpan()))
+                values.Add(new TokenMatch(this, data));
 
-            return true;
+            reader.Advance(data.LongLength);
+
+            return DoneWith(status = OperationStatus.Done);
         }
 
         public static implicit operator StaticToken(string str)

@@ -23,16 +23,18 @@ namespace Finix.CsUtils
             return String.Join(" / ", Tokens.Select(t => t.ToString()));
         }
 
-        protected override bool TryMatchInternal(ReadOnlySpan<byte> bytes, out int tokenEnd, ICollection<TokenMatch>? values = null)
+        protected override bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status)
         {
-            tokenEnd = 0;
+            status = OperationStatus.InvalidData;
+            var at = reader.Consumed;
 
             foreach (var token in Tokens)
             {
-                tokenEnd = 0;
-                if (token.TryMatch(bytes, out tokenEnd, out var match, values == null))
+                if (token.TryMatch(ref reader, out var match, values == null, out var tempStatus))
                 {
-                    if (tokenEnd == 0)
+                    status = tempStatus;
+
+                    if (reader.Consumed == at)
                         continue;
 
                     if (match != null)
@@ -40,6 +42,9 @@ namespace Finix.CsUtils
 
                     return true;
                 }
+
+                if (tempStatus == OperationStatus.NeedMoreData)
+                    status = tempStatus;
             }
 
             return false;

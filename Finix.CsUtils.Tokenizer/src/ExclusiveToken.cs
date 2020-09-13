@@ -23,16 +23,24 @@ namespace Finix.CsUtils
             return $"( {Include} - {Exclude} )";
         }
 
-        protected override bool TryMatchInternal(ReadOnlySpan<byte> bytes, out int tokenEnd, ICollection<TokenMatch>? values = null)
+        protected override bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status)
         {
-            tokenEnd = 0;
+            var at = reader.Consumed;
+            var tempReader = reader;
 
-            var inc = Include.TryMatch(bytes, out tokenEnd, out var match, values == null);
-            var exc = Exclude.TryMatch(bytes, out _, out _, true);
+            var inc = Include.TryMatch(ref reader, out var match, values == null, out status);
 
-            if (!inc || exc)
+            if (inc)
             {
-                // tokenEnd = 0;
+                if (Exclude.TryMatch(ref tempReader, out _, true, out var tempStatus))
+                {
+                    status = tempStatus;
+                    reader = tempReader;
+                    return false;
+                }
+            }
+            else
+            {
                 return false;
             }
 

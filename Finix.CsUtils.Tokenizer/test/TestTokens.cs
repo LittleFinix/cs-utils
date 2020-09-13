@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Xunit;
 
 using static Finix.CsUtils.Token;
+using System.Buffers;
 
 namespace Finix.CsUtils.Tokenizer.Tests
 {
@@ -19,7 +20,7 @@ namespace Finix.CsUtils.Tokenizer.Tests
             .Combined()
             .Named("Word");
 
-        private static readonly Token SentenceParser = (1 * ((Word / !AWSP) - SentenceTerminator))
+        private static readonly Token SentenceParser = (1 * ((Word / !AWSP)))
             .Combined()
             .Named("Sentence");
 
@@ -33,7 +34,7 @@ namespace Finix.CsUtils.Tokenizer.Tests
             var sentence = "Hello World! How are you doing?\nI'm doing fine.";
             var sentenceBytes = Encoding.UTF8.GetBytes(sentence);
 
-            VCard.Execute(sentenceBytes, out var match);
+            SentencesParser.Execute(sentenceBytes, out var match, out _);
 
             PrintMatch(match);
         }
@@ -115,11 +116,13 @@ namespace Finix.CsUtils.Tokenizer.Tests
             var vcard = File.ReadAllBytes("example.vcf");
             var test = @"LABEL=""42 Plantation St.\nBaytown\, LA 30314\nUnited States of America""";
 
-            Assert.False(SafeChar.TryMatch(new[] { (byte) '"' }, out _, out _, true));
+            Assert.Throws<FormatException>(() => SafeChar.Execute(new[] { (byte) '"' }, out _, out _));
 
-            Assert.True(Param.TryMatch(Encoding.UTF8.GetBytes(test), out _, out _, true));
+            Assert.True(Param.Execute(Encoding.UTF8.GetBytes(test), out _, out var status));
+            Assert.Equal(OperationStatus.NeedMoreData, status);
 
-            VCard.Execute(vcard, out var match);
+
+            Assert.True(VCard.Execute(vcard, out var match, out _));
 
             PrintMatch(match);
         }

@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Text;
+using System.Buffers;
+using System.IO;
 using System.Numerics;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -79,20 +81,32 @@ namespace Finix.CsUtils
 
         // public bool DiscardValue { get; set; } = true;
 
-        protected abstract bool TryMatchInternal(ReadOnlySpan<byte> bytes, out int tokenEnd, ICollection<TokenMatch>? values = null);
-
-        public bool TryMatch(ReadOnlySpan<byte> bytes, out int tokenEnd, [MaybeNullWhen(false)] out TokenMatch match, bool noMatch = false)
+        protected bool DoneWith(OperationStatus status)
         {
+            return status == OperationStatus.Done;
+        }
+
+        protected abstract bool TryMatchInternal(ref SequenceReader<byte> reader, ICollection<TokenMatch>? values, out OperationStatus status);
+
+        public bool TryMatch(ref SequenceReader<byte> reader, [MaybeNullWhen(false)] out TokenMatch match, bool ignoreMatch, out OperationStatus status)
+        {
+#if DEBUG
+            var seq = reader.Sequence.Slice(reader.Consumed);
+#endif
+
             Debug.Indent();
-            Debug.WriteLine($"Running {this}"); // on { String.Join(' ', bytes.ToArray().Select(b => $"{b,2:X}")) }");
+            Debug.WriteLine($"Running {this} on {Encoding.UTF8.GetString(seq.ToArray()).Replace("\n", "\\n")}");
 
-            var list = noMatch ? null : new List<TokenMatch>();
-            var value = TryMatchInternal(bytes, out tokenEnd, list);
+            var at = reader.Consumed;
+            var tempReader = reader;
 
-            // if (value && tokenEnd == 0) // && !(this is RepeatingToken) && !(this is IgnoreToken t && t.BaseToken is RepeatingToken))
-            //     throw new InvalidOperationException("Can't return true and not advance.");
+            var list = ignoreMatch ? null : new List<TokenMatch>();
+            var ok = TryMatchInternal(ref tempReader, list, out status);
 
-            if (value && list != null)
+            if (ok)
+                reader = tempReader;
+
+            if (ok && list != null)
             {
                 match = new TokenMatch(this, list);
 
@@ -106,23 +120,29 @@ namespace Finix.CsUtils
                 match = null;
             }
 
-            Debug.WriteLine($"Running {this}: {value}");
+            Debug.WriteLine($"Running {this}: {status} (ok: {ok})");
             Debug.Unindent();
 
-            return value;
+            return ok;
         }
 
-        public void Execute(ReadOnlySpan<byte> bytes, out TokenMatch match)
+        public bool Execute(ref SequenceReader<byte> reader, out TokenMatch match, out OperationStatus status)
         {
-            if (!TryMatch(bytes, out var end, out match))
+            var start = reader.Position;
+            var tempReader = reader;
+
+            if (!TryMatch(ref reader, out var preMatch, false, out status) && status != OperationStatus.NeedMoreData)
             {
+                var end = reader.Consumed;
                 var line = 1;
                 var col = 1;
 
-                foreach (var b in bytes)
+                while (tempReader.TryRead(out var b))
                 {
                     if (end-- <= 0)
                         break;
+
+                    col++;
 
                     if (b == '\n')
                     {
@@ -134,8 +154,26 @@ namespace Finix.CsUtils
                 throw new FormatException($"Parsing failed on line {line} column {col}.");
             }
 
-            if (match == null)
+            if (preMatch == null)
                 throw new NullReferenceException($"The execution succeeded but failed to return a TokenMatch.");
+
+            match = preMatch;
+
+            return true;
+        }
+
+        public bool Execute(ReadOnlySequence<byte> bytes, out TokenMatch match, out OperationStatus status)
+        {
+            var sr = new SequenceReader<byte>(bytes);
+
+            return Execute(ref sr, out match, out status);
+        }
+
+        public bool Execute(byte[] bytes, out TokenMatch match, out OperationStatus status)
+        {
+            var seq = new ReadOnlySequence<byte>(bytes);
+
+            return Execute(seq, out match, out status);
         }
 
         public Token Named(string name)
@@ -237,7 +275,7 @@ namespace Finix.CsUtils
 
         public static Token operator !(Token t)
         {
-            return new IgnoreToken(t);
+            return new SilentToken(t);
             // var clone = (Token) t.MemberwiseClone();
             // clone.DiscardValue = false;
 
