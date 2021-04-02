@@ -9,6 +9,27 @@ using System.IO;
 
 namespace Finix.CsUtils
 {
+    [Flags]
+    public enum WordRuneType
+    {
+        None = 0,
+        AlphaNumeric = 1 << 1,
+        Punctuation = 1 << 2,
+        Symbols = 1 << 3,
+        Whitespace = 1 << 4,
+        Underscore = 1 << 5,
+        Dash = 1 << 6,
+    }
+
+    public enum StrEnumeratorResult
+    {
+        Continue = 0,
+        Split = 1,
+        Skip = 2,
+        Discard = 3,
+        Stop = 4
+    }
+
     /// <summary>
     /// A class containing helper functions for string operations.
     /// </summary>
@@ -37,7 +58,7 @@ namespace Finix.CsUtils
         /// </summary>
         /// <param name="with">A character to join the strings with.</param>
         /// <returns>A higher order function that joins strings.</returns>
-        public static Func<string, string, string> Joiner(char with)
+        public static Func<string?, string?, string> Joiner(char with)
         {
             return Joiner(with.ToString());
         }
@@ -47,16 +68,135 @@ namespace Finix.CsUtils
         /// </summary>
         /// <param name="with">A string to join the strings with.</param>
         /// <returns>A higher order function that joins strings.</returns>
-        public static Func<string, string, string> Joiner(string with)
+        public static Func<string?, string?, string> Joiner(string with)
         {
             return (a, b) => {
-                return String.IsNullOrEmpty(a)
+                var result = String.IsNullOrEmpty(a)
                     ? b
                     : String.IsNullOrEmpty(b)
                         ? a
                         : $"{a}{with}{b}";
+
+                return result ?? String.Empty;
             };
         }
+
+        public static WordRuneType GetWordRuneType(int r)
+        {
+            return GetWordRuneType(new Rune(r));
+        }
+
+        public static WordRuneType GetWordRuneType(this Rune r)
+        {
+            if (Rune.IsLetterOrDigit(r))
+                return WordRuneType.AlphaNumeric;
+            else if (Rune.IsWhiteSpace(r))
+                return WordRuneType.Whitespace;
+            else if (r.Value is '-' or (>= 0x2012 and <= 0x2014))
+                return WordRuneType.Dash;
+            else if (r.Value == '_')
+                return WordRuneType.Underscore;
+            else if (Rune.IsPunctuation(r))
+                return WordRuneType.Punctuation;
+            else if (Rune.IsSymbol(r))
+                return WordRuneType.Symbols;
+            else
+                return WordRuneType.None;
+        }
+
+        public static IEnumerable<Rune> EnumerateRunes(this StringBuilder builder)
+        {
+            foreach (var chunk in builder.GetChunks())
+            {
+                foreach (var rune in new string(chunk.Span).EnumerateRunes())
+                    yield return rune;
+            }
+        }
+
+        public static IEnumerable<(Rune, Rune, int)> Grouped(this IEnumerable<Rune> runes)
+        {
+            var i = 0;
+            var prev = new Rune(0);
+
+            foreach (var rune in runes)
+            {
+                yield return (rune, prev, i++);
+                prev = rune;
+            }
+        }
+
+        public static IEnumerable<T> EnumerateSubstrings<T>(this string text, Func<string, int, Rune, Rune, StrEnumeratorResult> split, Func<Range, string, T> output, bool reverse = false)
+        {
+            IEnumerable<Rune> it = text.EnumerateRunes();
+
+            if (reverse)
+                it = it.Reverse();
+
+            var i = reverse ? text.Length : 0;
+
+            var prev = i;
+            var previous = new Rune(0);
+
+            foreach (var rune in it)
+            {
+                var result = split(text, i, rune, previous);
+                switch (result)
+                {
+                    case StrEnumeratorResult.Continue:
+                        break;
+
+                    case StrEnumeratorResult.Split:
+                        yield return output(Math.Min(prev, i)..Math.Max(prev, i), text);
+                        prev = i;
+                        break;
+
+                    case StrEnumeratorResult.Skip:
+                        if (i != prev)
+                            yield return output(Math.Min(prev, i - 1)..Math.Max(prev, i - 1), text);
+
+                        prev = i + 1;
+                        break;
+
+
+                    case StrEnumeratorResult.Discard:
+                        prev = i;
+                        break;
+
+                    case StrEnumeratorResult.Stop:
+                        yield break;
+
+                    default:
+                        throw new NotSupportedException($"Unsupported StrEnumeratorResult: {result}");
+                }
+
+                i = reverse ? i-- : i++;
+                previous = rune;
+            }
+
+            yield return output(Math.Min(prev, i)..Math.Max(prev, i), text);
+        }
+
+        // public static IEnumerable<string> Words(this string text, WordRuneType includeInWord = WordRuneType.AlphaNumeric, WordRuneType includeInOutput = WordRuneType.None, int? max = null)
+        // {
+        //     return text.EnumerateSubstrings(
+        //         (text, nr, ch, prev) => {
+        //             if (!Rune.IsValid(ch.Value) || Rune.IsControl(ch))
+        //                 return StrEnumeratorResult.Skip;
+
+        //             if (max <= 0)
+        //                 return StrEnumeratorResult.Continue;
+
+        //             var category = ch.GetWordRuneType();
+
+        //             if (category == WordRuneType.None)
+        //                 return StrEnumeratorResult.Skip;
+
+        //             if (!includeInWord.HasFlag(category))
+        //                 return StrEnumeratorResult.Split;
+        //         },
+        //         (r, text) => text[r]
+        //     );
+        // }
 
         /// <summary>
         /// Enumerate a string's words.
@@ -70,12 +210,27 @@ namespace Finix.CsUtils
         /// <param name="indicateWhitespace">Indicate whitespace by including a single standard space (' ', U+0x000A) in the output.</param>
         /// <param name="max">Maximum number of words to return in the output (including symbols and whitespace, if applicable), the last element of the output will be the remaining text.</param>
         /// <returns></returns>
-        public static IEnumerable<string> Words(this string text, bool includePunctuation = false, bool includeSymbols = false, bool indicateWhitespace = false, int? max = null)
+        public static IEnumerable<string> Words(this string text, WordRuneType includeInWord = WordRuneType.AlphaNumeric, WordRuneType includeInOutput = WordRuneType.None, int? max = null)
         {
             max ??= Int32.MaxValue;
 
             var word = new StringBuilder(12);
             var previous = new Rune(0);
+
+            bool TryReturn(out string result)
+            {
+                result = word!.ToString();
+
+                if (!String.IsNullOrWhiteSpace(result))
+                {
+                    max--;
+                    word.Clear();
+
+                    return true;
+                }
+
+                return false;
+            }
 
             foreach (var ch in text.EnumerateRunes())
             {
@@ -88,58 +243,112 @@ namespace Finix.CsUtils
                     continue;
                 }
 
-                if (Rune.IsWhiteSpace(ch)
+                var category = ch.GetWordRuneType();
+
+                if (category == WordRuneType.None)
+                    continue;
+
+                /*
+                Rune.IsWhiteSpace(ch)
                     || (Rune.IsLetter(previous) && Rune.IsUpper(ch) && Rune.IsLower(previous))
-                    || (Rune.IsPunctuation(ch) && !includePunctuation && !Rune.IsSeparator(ch))
-                    || (Rune.IsSymbol(ch) && !includeSymbols && !Rune.IsSeparator(ch)))
+                    || (Rune.IsPunctuation(ch) && !includeInOutput.HasFlag(WordRuneType.Punctuation) && !Rune.IsSeparator(ch))
+                    || (Rune.IsSymbol(ch) && !includeInOutput.HasFlag(WordRuneType.Symbols) && !Rune.IsSeparator(ch))
+                    */
+
+                if (!includeInWord.HasFlag(category))
                 {
-                    if (!String.IsNullOrWhiteSpace(word.ToString()))
-                    {
-                        max--;
-                        yield return word.ToString().Trim();
-                    }
+                    if (TryReturn(out var result))
+                        yield return result;
 
-                    word.Clear();
-
-                    if (Rune.IsWhiteSpace(ch) && indicateWhitespace)
+                    if (category == WordRuneType.Whitespace && includeInOutput.HasFlag(WordRuneType.Whitespace))
                     {
                         if (Rune.IsWhiteSpace(previous))
                             continue;
 
                         max--;
-                        previous = ch;
                         yield return " ";
                     }
-                    else if (!Rune.IsSeparator(ch)
-                        && ((Rune.IsPunctuation(ch) && includePunctuation) || (Rune.IsSymbol(ch) && includeSymbols)))
+                    else if (includeInOutput.HasFlag(category))
                     {
                         max--;
                         yield return ch.ToString();
                     }
                 }
-
-                if (Rune.IsLetterOrDigit(ch) || Rune.IsSeparator(ch))
+                else if (Rune.IsLetter(previous) && Rune.IsUpper(ch) && Rune.IsLower(previous))
                 {
-                    previous = ch;
+                    if (TryReturn(out var result))
+                        yield return result;
+                }
+
+                if (includeInWord.HasFlag(category))
+                {
                     word.Append(ch);
                 }
-                else
-                {
-                    previous = new Rune(0);
-                }
+
+                previous = ch;
             }
 
-            if (!String.IsNullOrWhiteSpace(word.ToString()))
-            {
-                yield return word.ToString().Trim();
-            }
-            else if (indicateWhitespace)
-            {
+            if (TryReturn(out var finalResult))
+                yield return finalResult;
+            else if (includeInOutput.HasFlag(WordRuneType.Whitespace))
                 yield return " ";
-            }
         }
 
-        private static readonly Regex fileNameCleanup = new Regex("([^a-zA-Z0-9 _-])");
+        public static bool IsWordBoundary(Rune a, Rune b, WordRuneType wordTypes)
+        {
+            return IsWordBoundary(a, b, r => wordTypes.HasFlag(r.GetWordRuneType()));
+        }
+
+        public static bool IsWordBoundary(Rune a, Rune b, ICollection<Rune> wordCharacters)
+        {
+            return IsWordBoundary(a, b, r => wordCharacters.Contains(r));
+        }
+
+        public static bool IsWordBoundary(Rune a, Rune b, params Predicate<Rune>[] isWordCharacterMatchers)
+        {
+            if (isWordCharacterMatchers.Length == 0)
+                isWordCharacterMatchers = new Predicate<Rune>[] { Rune.IsLetterOrDigit };
+
+            var match_a = isWordCharacterMatchers.Any(m => m(a));
+            var match_b = isWordCharacterMatchers.Any(m => m(b));
+
+            return match_a != match_b;
+        }
+
+        public static Index WordBoundary(this IEnumerable<Rune> text, Index from, Func<Rune, Rune, bool>? wordBoundaryFn = null)
+        {
+            wordBoundaryFn ??= (a, b) => IsWordBoundary(a, b);
+
+            if (from.IsFromEnd)
+                text = text.Reverse().Skip(from.Value);
+            else
+                text = text.Skip(from.Value);
+
+            var start = true;
+            var last = 0;
+            foreach (var (rune, prev, i) in text.Grouped())
+            {
+                if (start && (Rune.IsWhiteSpace(rune) || Rune.IsWhiteSpace(prev)))
+                    continue;
+                else
+                    start = false;
+
+                if (prev.Value > 0 && wordBoundaryFn(rune, prev))
+                    return new Index(from.Value + i, from.IsFromEnd);
+
+                last = i;
+            }
+
+            if (!from.IsFromEnd)
+                last++;
+
+            return new Index(from.Value + last, from.IsFromEnd);
+        }
+
+        public static Index WordBoundary(this string text, Index from, Func<Rune, Rune, bool>? wordBoundaryFn = null)
+        {
+            return text.EnumerateRunes().WordBoundary(from, wordBoundaryFn);
+        }
 
         public static string FileName(this string text)
         {
@@ -183,17 +392,17 @@ namespace Finix.CsUtils
                 : Words(text).Select(w => TextInfo.ToLower(w)).Join('-');
         }
 
-        public static string Join(this IEnumerable<string> words, char with = ' ')
+        public static string Join(this IEnumerable<string?> words, char with = ' ')
         {
-            return words.Aggregate(Joiner(with));
+            return words.Where(w => !String.IsNullOrEmpty(w)).DefaultIfEmpty().Aggregate(Joiner(with))!; // Joiner never returns null.
         }
 
-        public static string Join(this IEnumerable<string> words, string with)
+        public static string Join(this IEnumerable<string?> words, string with)
         {
-            return words.Aggregate(Joiner(with));
+            return words.Where(w => !String.IsNullOrEmpty(w)).DefaultIfEmpty().Aggregate(Joiner(with))!; // Joiner never returns null.
         }
 
-        public static IEnumerable<string> Split(StringRuneEnumerator text, Rune[] at, Rune[] escapeSingle, (Rune, Rune)[] escapeBetween)
+        public static IEnumerable<string> Split(IEnumerable<Rune> text, Rune[] at, Rune[] escapeSingle, (Rune, Rune)[] escapeBetween)
         {
             var escapeIdx = -1;
             var escapeNext = false;
@@ -259,55 +468,6 @@ namespace Finix.CsUtils
                 new[] { (Rune) '\\' },
                 new[] { ((Rune) '"', (Rune) '"'), ((Rune) '\'', (Rune) '\'') }
             );
-
-            // char escapeChar = '\0';
-            // bool escapeNext = false;
-
-            // string part = String.Empty;
-
-            // foreach (var c in text)
-            // {
-            //     if (escapeNext)
-            //     {
-            //         escapeNext = false;
-            //         part += c;
-            //         continue;
-            //     }
-
-            //     switch (c)
-            //     {
-            //         case '\\':
-            //             escapeNext = true;
-            //             break;
-
-            //         case '\'' when escapeChar == '\0':
-            //             escapeChar = '\'';
-            //             break;
-
-            //         case '\'' when escapeChar == '\'':
-            //             escapeChar = '\0';
-            //             break;
-
-            //         case '"' when escapeChar == '\0':
-            //             escapeChar = '"';
-            //             break;
-
-            //         case '"' when escapeChar == '"':
-            //             escapeChar = '\0';
-            //             break;
-
-            //         case ' ' when escapeChar == '\0':
-            //             yield return part;
-            //             part = String.Empty;
-            //             break;
-
-            //         default:
-            //             part += c;
-            //             break;
-            //     }
-            // }
-
-            // yield return part;
         }
 
         public static string SignificantSpace(string? val, bool collapseNewlines = true)
@@ -317,8 +477,8 @@ namespace Finix.CsUtils
 
             if (collapseNewlines)
             {
-                val.Replace("\n\r", " ");
-                val.Replace("\n", " ");
+                val = val.Replace("\n\r", " ");
+                val = val.Replace("\n", " ");
             }
 
             var len = val.Length;
