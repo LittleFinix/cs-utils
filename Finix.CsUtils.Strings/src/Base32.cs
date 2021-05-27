@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
 using System.Linq;
-using System.Buffers;
 
 using System;
 using System.Collections.Generic;
@@ -9,6 +8,10 @@ using System.Text.RegularExpressions;
 
 namespace Finix.CsUtils
 {
+
+#if NETCOREAPP3_0_OR_GREATER
+    using System.Buffers;
+
     public static class Base32
     {
         public const int ByteBitCount = 8;
@@ -322,4 +325,5 @@ namespace Finix.CsUtils
             return OperationStatus.Done;
         }
     }
+#endif
 }

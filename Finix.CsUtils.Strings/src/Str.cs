@@ -106,24 +106,37 @@ namespace Finix.CsUtils
 
         public static IEnumerable<Rune> EnumerateRunes(this StringBuilder builder)
         {
+#if NETCOREAPP3_0_OR_GREATER
             foreach (var chunk in builder.GetChunks())
             {
                 foreach (var rune in new string(chunk.Span).EnumerateRunes())
                     yield return rune;
             }
+#else
+            foreach (var rune in builder.ToString().EnumerateRunes())
+                yield return rune;
+#endif
         }
 
-        public static IEnumerable<(Rune, Rune, int)> Grouped(this IEnumerable<Rune> runes)
+        public struct RuneGroup
+        {
+            public Rune Previous, Rune;
+            public int Index;
+        }
+
+        public static IEnumerable<RuneGroup> Grouped(this IEnumerable<Rune> runes)
         {
             var i = 0;
             var prev = new Rune(0);
 
             foreach (var rune in runes)
             {
-                yield return (rune, prev, i++);
+                yield return new RuneGroup { Previous = rune, Rune = prev, Index = i++ };
                 prev = rune;
             }
         }
+
+#if NETCOREAPP3_0_OR_GREATER
 
         public static IEnumerable<T> EnumerateSubstrings<T>(this string text, Func<string, int, Rune, Rune, StrEnumeratorResult> split, Func<Range, string, T> output, bool reverse = false)
         {
@@ -175,6 +188,7 @@ namespace Finix.CsUtils
 
             yield return output(Math.Min(prev, i)..Math.Max(prev, i), text);
         }
+#endif
 
         // public static IEnumerable<string> Words(this string text, WordRuneType includeInWord = WordRuneType.AlphaNumeric, WordRuneType includeInOutput = WordRuneType.None, int? max = null)
         // {
@@ -315,6 +329,7 @@ namespace Finix.CsUtils
             return match_a != match_b;
         }
 
+#if NETCOREAPP3_0_OR_GREATER
         public static Index WordBoundary(this IEnumerable<Rune> text, Index from, Func<Rune, Rune, bool>? wordBoundaryFn = null)
         {
             wordBoundaryFn ??= (a, b) => IsWordBoundary(a, b);
@@ -326,8 +341,12 @@ namespace Finix.CsUtils
 
             var start = true;
             var last = 0;
-            foreach (var (rune, prev, i) in text.Grouped())
+            foreach (var g in text.Grouped())
             {
+                var rune = g.Rune;
+                var prev = g.Previous;
+                var i = g.Index;
+
                 if (start && (Rune.IsWhiteSpace(rune) || Rune.IsWhiteSpace(prev)))
                     continue;
                 else
@@ -336,11 +355,8 @@ namespace Finix.CsUtils
                 if (prev.Value > 0 && wordBoundaryFn(rune, prev))
                     return new Index(from.Value + i, from.IsFromEnd);
 
-                last = i;
+                last = i + 1;
             }
-
-            if (!from.IsFromEnd)
-                last++;
 
             return new Index(from.Value + last, from.IsFromEnd);
         }
@@ -349,6 +365,48 @@ namespace Finix.CsUtils
         {
             return text.EnumerateRunes().WordBoundary(from, wordBoundaryFn);
         }
+
+#else
+
+        public static int WordBoundary(this IEnumerable<Rune> text, int from, Func<Rune, Rune, bool>? wordBoundaryFn = null)
+        {
+            wordBoundaryFn ??= (a, b) => IsWordBoundary(a, b);
+
+            bool fromEnd = from < 0;
+            from = Math.Abs(from);
+
+            if (fromEnd)
+                text = text.Reverse().Skip(from);
+            else
+                text = text.Skip(from);
+
+            var start = true;
+            var last = 0;
+            foreach (var g in text.Grouped())
+            {
+                var rune = g.Rune;
+                var prev = g.Previous;
+                var i = g.Index;
+
+                if (start && (Rune.IsWhiteSpace(rune) || Rune.IsWhiteSpace(prev)))
+                    continue;
+                else
+                    start = false;
+
+                if (prev.Value > 0 && wordBoundaryFn(rune, prev))
+                    return from + i * (fromEnd ? -1 : 1);
+
+                last = i + 1;
+            }
+
+            return from + last * (fromEnd ? -1 : 1);
+        }
+
+        public static int WordBoundary(this string text, int from, Func<Rune, Rune, bool>? wordBoundaryFn = null)
+        {
+            return text.EnumerateRunes().WordBoundary(from, wordBoundaryFn);
+        }
+#endif
 
         public static string FileName(this string text)
         {
@@ -402,7 +460,26 @@ namespace Finix.CsUtils
             return words.Where(w => !String.IsNullOrEmpty(w)).DefaultIfEmpty().Aggregate(Joiner(with))!; // Joiner never returns null.
         }
 
-        public static IEnumerable<string> Split(IEnumerable<Rune> text, Rune[] at, Rune[] escapeSingle, (Rune, Rune)[] escapeBetween)
+        public struct EscapePair
+        {
+            public Rune Start, End;
+
+            public EscapePair(Rune start, Rune end)
+            {
+                Start = start;
+                End = end;
+            }
+        }
+
+#if NETCOREAPP3_0_OR_GREATER
+        [Obsolete("Use Split with the EscapePair parameter instead")]
+        public static IEnumerable<string> Split(this IEnumerable<Rune> text, Rune[] at, Rune[] escapeSingle, (Rune, Rune)[] escapeBetween)
+        {
+            return text.Split(at, escapeSingle, escapeBetween.Select(pair => new EscapePair { Start = pair.Item1, End = pair.Item2 }).ToArray());
+        }
+#endif
+
+        public static IEnumerable<string> Split(this IEnumerable<Rune> text, Rune[] at, Rune[] escapeSingle, EscapePair[] escapeBetween)
         {
             var escapeIdx = -1;
             var escapeNext = false;
@@ -425,7 +502,7 @@ namespace Finix.CsUtils
 
                 if (escapeIdx >= 0)
                 {
-                    if (escapeBetween[escapeIdx].Item2 == c)
+                    if (escapeBetween[escapeIdx].End == c)
                     {
                         escapeIdx = -1;
                         continue;
@@ -435,7 +512,7 @@ namespace Finix.CsUtils
                 {
                     for (var i = 0; i < escapeBetween.Length; i++)
                     {
-                        if (escapeBetween[i].Item1 == c)
+                        if (escapeBetween[i].Start == c)
                         {
                             escapeIdx = i;
                             break;
@@ -466,7 +543,7 @@ namespace Finix.CsUtils
                 text.EnumerateRunes(),
                 Runes.BreakableWhiteSpace.ToArray(),
                 new[] { (Rune) '\\' },
-                new[] { ((Rune) '"', (Rune) '"'), ((Rune) '\'', (Rune) '\'') }
+                new[] { new EscapePair((Rune) '"', (Rune) '"'), new EscapePair((Rune) '\'', (Rune) '\'') }
             );
         }
 

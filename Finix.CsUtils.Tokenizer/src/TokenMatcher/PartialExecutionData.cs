@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Buffers;
@@ -14,9 +15,15 @@ namespace Finix.CsUtils
 
         internal int Index { get; set; }
 
+        internal long Consumed { get; set; }
+
         internal bool Authoritative { get; set; }
 
         internal Token? AuthoritativeSource { get; set; }
+
+        internal bool MayContinue { get; set; } = false;
+
+        internal bool HasContinuations => MayContinue || subData.Values.Any(data => data.HasContinuations);
 
         internal Dictionary<int, List<TokenMatch>>? MatchMap { get; set; } = new Dictionary<int, List<TokenMatch>>();
 
@@ -24,6 +31,7 @@ namespace Finix.CsUtils
 
         internal PartialExecutionData GetIndexed(int i, bool silent = false, bool revokeAuthority = false)
         {
+            Trace.WriteLine($"Retrieving data for {i}");
             if (subData.TryGetValue(i, out var val))
                 return val;
 
@@ -101,6 +109,18 @@ namespace Finix.CsUtils
 
             matches.Add(match);
             return match;
+        }
+
+        internal int LastHash { get; set; } = -1;
+
+        internal int GetDynamicHashCode()
+        {
+            return HashCode.Combine(Index,
+                MayContinue,
+                Consumed,
+                subData.Values.Aggregate(0, (h, d) => HashCode.Combine(h, d.GetHashCode())),
+                Matches.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode()))
+            );
         }
     }
 }

@@ -34,7 +34,10 @@ namespace Finix.CsUtils
             if (!BaseToken.TryMatch(data.GetIndexed(0), ref reader, out var match, out status))
                 return false;
 
-            data.AddData(this, Replacer(match));
+            if (IsLiteral)
+                data.AddMatch(0, match);
+            else
+                data.AddData(this, Replacer(match));
 
             return true;
         }

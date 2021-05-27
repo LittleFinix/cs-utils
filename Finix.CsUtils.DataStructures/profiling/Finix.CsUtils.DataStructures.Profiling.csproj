@@ -13,6 +13,8 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <DefineTrace>true</DefineTrace>
+
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
 </Project>

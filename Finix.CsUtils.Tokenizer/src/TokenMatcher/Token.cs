@@ -10,78 +10,17 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Finix.CsUtils
 {
-    public abstract class Token : ICloneable
+    public abstract partial class Token : ICloneable
     {
-        public static readonly Token ALPHA = (T(0x41, 0x5A) / T(0x61, 0x7A)).Named("ALPHA");
-
-        public static readonly Token CHAR = T(0, 0x7F).Named("CHAR");
-
-        public static readonly Token CR = T('\r').Named("CR");
-
-        public static readonly Token LF = T('\n').Named("LF");
-
-        public static readonly Token CRLF = (CR + LF).Named("CRLF");
-
-        public static readonly Token LFCR = (LF + CR).Named("LFCR");
-
-        public static readonly Token EOL = (CRLF / LFCR / CR / LF).Named("EOL");
-
-        public static readonly Token CTL = (T(0x00, 0x1F) / 0x7F).Named("CTL");
-
-        public static readonly Token DIGIT = T(0x30, 0x39).Named("DIGIT");
-
-        public static readonly Token DQUOTE = T('"').Named("DQUOTE");
-
-        public static readonly Token HEXDIG = (DIGIT / T('a', 'f') / T('A', 'F')).Named("HEXDIG");
-
-        public static readonly Token HTAB = T(0x09).Named("HTAB");
-
-        public static readonly Token SP = T(0x20).Named("SP");
-
-        public static readonly Token WSP = (SP / HTAB).Named("WSP");
-
-        public static readonly Token LWSP = (0 * (WSP / (CRLF + WSP))).Named("LWSP");
-
-        public static readonly Token AWSP = (WSP / EOL).Named("AWSP");
-
-        public static readonly Token VCHAR = T(0x21, 0x7E).Named("VCHAR");
-
-        public static readonly Token OCTET = T(0x00, 0xFF).Named("OCTET");
-
-        public static readonly Token UTF8_Tail = T(0x80, 0xBF).Named("UTF8-tail");
-
-        public static readonly Token UTF8_1 = T(0, 0x7F).Named("UTF8-1");
-
-        public static readonly Token UTF8_2 = (
-            T(0xC2, 0xDF) + UTF8_Tail
-        ).Named("UTF8-2");
-
-        public static readonly Token UTF8_3 = (
-            (T(0xE0) + T(0xA0, 0xBF) + UTF8_Tail) /
-            (T(0xE1, 0xEC) + (2, 2) * UTF8_Tail) /
-            (T(0xED) + T(0x80, 0x9F) + UTF8_Tail) /
-            (T(0xEE, 0xEF) + (2, 2) * UTF8_Tail)
-        ).Named("UTF8-3");
-
-        public static readonly Token UTF8_4 = (
-            (T(0xF0) + T(0x90, 0xBF) + (2, 2) * UTF8_Tail) /
-            (T(0xF1, 0xF3) + (3, 3) * UTF8_Tail) /
-            (T(0xF4) + T(0x80, 0x8F) + (2, 2) * UTF8_Tail)
-        ).Named("UTF8-4");
-
-        public static readonly Token UTF8 = (
-            UTF8_1 / UTF8_2 / UTF8_3 / UTF8_4
-        ).Named("UTF8-char");
-
-        public static readonly Token UTF8_Octets = (0 * UTF8).Named("UTF8-octets");
-
         public virtual string? Name { get; set; }
 
         public bool Combine { get; set; }
 
-        public bool Debug { get; set; } = false;
+        public bool Debug { get; set; } = true;
 
         public bool IsAuthoritative { get; set; } = false;
+
+        public bool IsLiteral { get; set; } = false;
 
         // public bool DiscardValue { get; set; } = true;
 
@@ -98,8 +37,10 @@ namespace Finix.CsUtils
             var seq = reader.Sequence.Slice(reader.Consumed);
 #endif
 
+            Trace.WriteLineIf(Debug && data.Index != 0, $"{Trace.IndentLevel} Continuing with {this}, index {data.Index}");
+
             Trace.Indent();
-            Trace.WriteLineIf(Debug, $"Running {this} on {new TokenMatch(this, seq.ToArray())}");
+            Trace.WriteLineIf(Debug, $"{Trace.IndentLevel} Running {this} on {new TokenMatch(this, seq.ToArray())}");
 
             data.Authoritative |= IsAuthoritative;
 
@@ -108,6 +49,14 @@ namespace Finix.CsUtils
 
             var tempReader = reader;
             var ok = TryMatchInternal(data, ref tempReader, out status);
+
+            while (!ok && data.HasContinuations)
+            {
+                Trace.WriteLineIf(Debug, $"{Trace.IndentLevel} Continuing on {this}, index {data.Index}");
+
+                tempReader = reader;
+                ok = TryMatchInternal(data, ref tempReader, out status);
+            }
 
             if (ok)
                 reader = tempReader;
@@ -118,28 +67,39 @@ namespace Finix.CsUtils
             {
                 match = new TokenMatch(this, list);
 
-                if (Combine)
+                if (IsLiteral)
+                    match = new TokenMatch(this, match.Combine());
+                else if (Combine)
                     match = match.Collapse();
 
-                Trace.WriteLineIf(Debug, $"Matched {this}: {match}");
+                Trace.WriteLineIf(Debug, $"{Trace.IndentLevel} Matched {this}: {match}");
             }
             else
             {
                 match = null;
             }
 
-            Trace.WriteLineIf(Debug, $"Running {this}: {status} (ok: {ok})");
+            Trace.WriteLineIf(Debug, $"{Trace.IndentLevel} Running {this}: {status} (ok: {ok})");
             Trace.Unindent();
+
+            var hash = data.GetDynamicHashCode();
+            if (ok && data.LastHash != -1 && data.LastHash == hash)
+                throw new Exception("Infinite loop detected!");
+            else
+                data.LastHash = hash;
 
             return ok;
         }
 
-        public bool Execute(ref SequenceReader<byte> reader, out TokenMatch? match, out OperationStatus status)
+        public bool Execute(ref SequenceReader<byte> reader, [MaybeNullWhen(false)] out TokenMatch match, out OperationStatus status)
         {
             var ped = new object();
             var tempReader = reader;
 
             var ok = ExecutePartial(ref reader, out match, out status, ref ped);
+
+            if (match == null && !ok)
+                throw new NullReferenceException($"The execution succeeded but failed to return a TokenMatch.");
 
             if (status == OperationStatus.Done)
                 ok = true;
@@ -152,21 +112,21 @@ namespace Finix.CsUtils
             return ok;
         }
 
-        public bool Execute(ReadOnlySequence<byte> bytes, out TokenMatch? match, out OperationStatus status)
+        public bool Execute(ReadOnlySequence<byte> bytes, [MaybeNullWhen(false)] out TokenMatch match, out OperationStatus status)
         {
             var sr = new SequenceReader<byte>(bytes);
 
             return Execute(ref sr, out match, out status);
         }
 
-        public bool Execute(byte[] bytes, out TokenMatch? match, out OperationStatus status)
+        public bool Execute(byte[] bytes, [MaybeNullWhen(false)] out TokenMatch match, out OperationStatus status)
         {
             var seq = new ReadOnlySequence<byte>(bytes);
 
             return Execute(seq, out match, out status);
         }
 
-        internal bool ExecutePartial(ref SequenceReader<byte> reader, out TokenMatch? match, out OperationStatus status, ref object? partialData)
+        internal bool ExecutePartial(ref SequenceReader<byte> reader, [MaybeNullWhen(false)] out TokenMatch match, out OperationStatus status, ref object? partialData)
         {
             if (!(partialData is PartialExecutionData ped))
                 partialData = ped = new PartialExecutionData();
@@ -193,8 +153,25 @@ namespace Finix.CsUtils
 
         public Token Combined(bool combined = true)
         {
-            Combine = combined;
-            return this;
+            var n = (Token) Clone();
+            n.Combine = combined;
+
+            return n;
+        }
+
+        public Token Literal(bool enabled = true, bool recurse = true)
+        {
+            var n = ((Token) Clone()).Silent(false);
+            n.IsLiteral = enabled;
+
+            if (recurse && n is MultiToken mt)
+            {
+                mt.Tokens = mt.Tokens
+                    .Select(t => t.Literal(enabled, recurse))
+                    .ToArray();
+            }
+
+            return n;
         }
 
         public Token Debugging(bool enabled = true, bool recurse = false)
@@ -214,8 +191,18 @@ namespace Finix.CsUtils
 
         public Token Authoritative(bool enable = true)
         {
-            IsAuthoritative = enable;
-            return this;
+            var n = (Token) Clone();
+            n.IsAuthoritative = enable;
+
+            return n;
+        }
+
+        public Token Silent(bool enable = true)
+        {
+            if (enable)
+                return this is SilentToken st ? st : !this;
+            else
+                return this is SilentToken st ? !st : this;
         }
 
         public virtual string GetName()
@@ -397,7 +384,7 @@ namespace Finix.CsUtils
 
         public static Token operator !(Token t)
         {
-            return new SilentToken(t);
+            return t is SilentToken st ? st.BaseToken : new SilentToken(t);
             // var clone = (Token) t.MemberwiseClone();
             // clone.DiscardValue = false;
 

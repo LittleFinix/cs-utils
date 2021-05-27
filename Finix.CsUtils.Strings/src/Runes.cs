@@ -1,8 +1,6 @@
 using System.Linq;
-using System.Buffers.Text;
 using System.Text;
 using System.Collections.Generic;
-using System.Text.Unicode;
 
 namespace Finix.CsUtils
 {
@@ -13,7 +11,7 @@ namespace Finix.CsUtils
     {
         // ! Please keep these ordered by ascending code-point, per category.
 
-        public static IReadOnlySet<Rune> BreakingWhiteSpace { get; } = new HashSet<Rune>() {
+        public static ISet<Rune> BreakingWhiteSpace { get; } = new HashSet<Rune>() {
             new Rune(0x000A), // LF
             new Rune(0x000B), // Vertical Tab
             new Rune(0x000C), // Form Feed
@@ -23,7 +21,7 @@ namespace Finix.CsUtils
             new Rune(0x2029), // Paragraph Separator
         };
 
-        public static IReadOnlySet<Rune> BreakableWhiteSpace { get; } = new HashSet<Rune>(BreakingWhiteSpace) {
+        public static ISet<Rune> BreakableWhiteSpace { get; } = new HashSet<Rune>(BreakingWhiteSpace) {
             new Rune(0x0009), // Tab
             new Rune(0x0020), // Space
             new Rune(0x180E), // Mongolian Vowel Separator
@@ -42,12 +40,12 @@ namespace Finix.CsUtils
             new Rune(0x3000), // Ideographic Space
         };
 
-        public static IReadOnlySet<Rune> NonBreakableWhiteSpace { get; } = new HashSet<Rune>() {
+        public static ISet<Rune> NonBreakableWhiteSpace { get; } = new HashSet<Rune>() {
             new Rune(0x1680), // NBSP
             new Rune(0x2007), // Figure Space
             new Rune(0x202F), // Narrow NBSP
         };
 
-        public static IReadOnlySet<Rune> Whitespace { get; } = new HashSet<Rune>(BreakableWhiteSpace.Concat(NonBreakableWhiteSpace));
+        public static ISet<Rune> Whitespace { get; } = new HashSet<Rune>(BreakableWhiteSpace.Concat(NonBreakableWhiteSpace));
     }
 }

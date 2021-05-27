@@ -26,13 +26,20 @@ namespace Finix.CsUtils
         internal override bool TryMatchInternal(PartialExecutionData data, ref SequenceReader<byte> reader, out OperationStatus status)
         {
             status = OperationStatus.Done;
+            data.MayContinue = false;
 
-            data.ClearData(data.Index);
             foreach (var token in Tokens.Skip(data.Index))
             {
-                if (!token.TryMatch(data.GetIndexed(data.Index), ref reader, out var match, out status))
+                data.ClearData(data.Index);
+                var d = data.GetIndexed(data.Index);
+
+                if (!token.TryMatch(d, ref reader, out var match, out status))
                 {
-                    data.Index--;
+                    data.MayContinue = false;
+
+                    if (data.Index > 0)
+                        data.Index--;
+
                     return false;
                 }
 
@@ -44,6 +51,7 @@ namespace Finix.CsUtils
                 data.Index++;
             }
 
+            data.MayContinue = false;
             return true;
         }
     }

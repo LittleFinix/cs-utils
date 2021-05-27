@@ -1,16 +1,13 @@
 using System.Globalization;
-using System.Buffers.Text;
-using System.Runtime.InteropServices;
-using System.Linq;
-using System.Buffers;
-
 using System;
-using System.Collections.Generic;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Finix.CsUtils
 {
+
+#if NETCOREAPP3_0_OR_GREATER
+    using System.Buffers;
+
     public static class Hex
     {
         public static int GetMaxEncodedToUtf8Length(int length)
@@ -86,4 +83,5 @@ namespace Finix.CsUtils
             throw new NotSupportedException();
         }
     }
+#endif
 }

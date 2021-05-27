@@ -77,6 +77,7 @@ namespace Finix.CsUtils.Strings
             yield return new object[] { str, 0, 3, 0, "|AAA bbb ccc -> AAA| bbb ccc", "|AAA bbb ccc -> |AAA bbb ccc" };
             yield return new object[] { str, 5, 7, 4, "AAA b|bb ccc -> AAA bbb| ccc", "AAA b|bb ccc -> AAA |bbb ccc" };
             yield return new object[] { str, 7, 11, 4, "AAA bbb| ccc -> AAA bbb ccc|", "AAA bbb| ccc -> AAA |bbb ccc" };
+            yield return new object[] { str, 2, 3, 0, "AA|A bbb ccc -> AAA| bbb ccc", "AA|A bbb ccc -> |AAA bbb ccc" };
         }
 
         [Theory]

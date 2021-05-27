@@ -90,17 +90,44 @@ namespace Finix.CsUtils
             return encoder.GetString(Combine());
         }
 
-        public IEnumerable<TokenMatch> Find(string tokenName)
+        public IEnumerable<TokenMatch> Find(string tokenName, bool recursive = false)
         {
-            return SubMatches.Where(m => m.Token.Name == tokenName);
+            var matches = SubMatches == null
+                ? Enumerable.Empty<TokenMatch>()
+                : SubMatches;
+
+            if (recursive)
+                matches = matches.SelectMany(m => m.Find(tokenName, true).Append(m));
+
+            return matches.Where(m => m.Token.Name == tokenName);
         }
 
-        public IEnumerable<TokenMatch> Find(Token token)
+        public IEnumerable<TokenMatch> Find(Token token, bool recursive = false)
         {
             if (token.Name == null)
                 return Enumerable.Empty<TokenMatch>();
 
-            return Find(token.Name);
+            return Find(token.Name, recursive);
+        }
+
+        public TokenMatch? First(Token key, bool recursive = false)
+        {
+            return Find(key, recursive).FirstOrDefault();
+        }
+
+        public TokenMatch[] All(Token key, bool recursive = false)
+        {
+            return Find(key, recursive).ToArray();
+        }
+
+        public string? GetString(Token key, bool recursive = false)
+        {
+            return First(key, recursive)?.AsString();
+        }
+
+        public string[] GetStrings(Token key, bool recursive = false)
+        {
+            return Find(key, recursive).Select(m => m.AsString()).ToArray();
         }
 
         public override string ToString()

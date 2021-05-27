@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net5.0;netcoreapp3.0;netframework4.6</TargetFrameworks>
     <DefaultNamespace>Finix.CsUtils</DefaultNamespace>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>0.2.0</Version>
+    <Version>0.2.3</Version>
   </PropertyGroup>
 
   <ItemGroup>

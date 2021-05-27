@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Text;
+using System.Numerics;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Buffers;
@@ -23,6 +24,11 @@ namespace Finix.CsUtils
 
         public RangeToken(byte low, byte high)
             : this(new[] { low }, new[] { high })
+        {
+        }
+
+        public RangeToken(char low, char high)
+            : this(Encoding.UTF8.GetBytes(low.ToString()), Encoding.UTF8.GetBytes(high.ToString()))
         {
         }
 

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.IO;
 using System.Text;
 using System;
@@ -12,6 +13,75 @@ namespace Finix.CsUtils.Tokenizer.Tests
 {
     public class TestTokens
     {
+        private static readonly Token Alternatives = (
+                1 * T('a')) + ('.' + (1 * T('b'))
+            )
+            .Combined()
+            .Debugging(recurse: true)
+            .Named("Alternatives");
+
+        [Fact]
+        public void MatchAlternatives()
+        {
+            var values = new[] {
+                "aaa.bbb",
+                "aa.bb",
+                "a.b"
+            };
+
+            foreach (var val in values)
+            {
+                var bytes = Encoding.UTF8.GetBytes(val);
+
+                Assert.True(Alternatives.Debugging(recurse: true).Execute(bytes, out var match, out var status));
+            }
+        }
+
+        [Fact]
+        public void MatchIPs()
+        {
+            var uris = new[] {
+                "2001:db8::7",
+                "192.0.2.16",
+            };
+
+            foreach (var uri in uris)
+            {
+                var bytes = Encoding.UTF8.GetBytes(uri);
+
+                Assert.True(IP.Debugging(recurse: true).Execute(bytes, out var match, out var status));
+            }
+        }
+
+        [Fact]
+        public void MatchURIs()
+        {
+            var uris = new[] {
+                "https://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top",
+                "ldap://[2001:db8::7]/c=GB?objectClass?one",
+                "news:comp.infosystems.www.servers.unix",
+                "tel:+1-816-555-1212",
+                "telnet://192.0.2.16:80/",
+                "urn:oasis:names:specification:docbook:dtd:xml:4.1.2"
+            };
+
+            foreach (var uri in uris)
+            {
+                var realUri = new Uri(uri);
+                var bytes = Encoding.UTF8.GetBytes(uri);
+
+                Assert.True(URI.Execute(bytes, out var match, out var status));
+                Assert.NotEqual(OperationStatus.InvalidData, status);
+                Assert.NotEqual(OperationStatus.DestinationTooSmall, status);
+
+                Assert.Equal(realUri.Scheme, match.GetString(URIParts.Scheme));
+                Assert.Equal(realUri.UserInfo, match.GetString(URIParts.Userinfo, true));
+                Assert.Equal(realUri.Host, match.GetString(URIParts.Host, true));
+
+                // Assert.Equal(realUri.Authority, match.GetString(URIParts.Authority)); // ! CLR Authority is not as per RFC 3986 3.2., it should contain userinfo
+            }
+        }
+
         private static readonly Token SentenceTerminator = (T('!') / '?' / '.')
             .Combined()
             .Named("Sentence Terminator");

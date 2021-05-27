@@ -32,22 +32,38 @@ namespace Finix.CsUtils
 
         internal override bool TryMatchInternal(PartialExecutionData data, ref SequenceReader<byte> reader, out OperationStatus status)
         {
-            if (data.Index > Max)
-                throw new IndexOutOfRangeException("Index must be less than or equal to Max");
-
             status = OperationStatus.Done;
+
+            if (data.Index > Max)
+            {
+                data.MayContinue = false;
+                return false;
+            }
+
+            if (data.Consumed != 0)
+                reader.Advance(data.Consumed - reader.Consumed);
 
             for (; data.Index <= Max; data.Index++)
             {
+                data.MayContinue = false;
+
                 var at = reader.Consumed;
                 if (!BaseToken.TryMatch(data.GetIndexed(data.Index, revokeAuthority: data.Index >= Min), ref reader, out var match, out status) || reader.Consumed == at)
                     goto end;
 
+                data.Consumed = reader.Consumed;
+                data.ClearData(data.Index);
                 data.AddMatch(data.Index, match);
+
+                if (data.Index >= Min)
+                {
+                    data.MayContinue = true;
+                    goto end;
+                }
             }
 
         end:
-            if (data.Index < Min && status == OperationStatus.Done)
+            if (data.Index < Min)
             {
                 status = OperationStatus.NeedMoreData;
                 return false;
@@ -56,6 +72,8 @@ namespace Finix.CsUtils
             {
                 if (status != OperationStatus.NeedMoreData)
                     status = OperationStatus.Done;
+                else
+                    data.MayContinue = true;
 
                 return true;
             }
