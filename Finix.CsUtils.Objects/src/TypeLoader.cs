@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System;
@@ -60,7 +61,7 @@ namespace Finix.CsUtils
                 return (T) Instance(parameters);
             }
 
-            public virtual T Attribute<T>() where T : Attribute
+            public virtual T? Attribute<T>() where T : Attribute
             {
                 return Attributes.OfType<T>().FirstOrDefault();
             }
@@ -142,10 +143,24 @@ namespace Finix.CsUtils
         {
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                if (!assembly.IsFullyTrusted || assembly.IsDynamic || assembly.ReflectionOnly)
+                if (!assembly.IsFullyTrusted
+                    || assembly.IsDynamic
+                    || assembly.ReflectionOnly)
                     continue;
 
-                foreach (var type in LoadFromAssembly(assembly, query))
+                IEnumerable<Result> results;
+
+                try
+                {
+                    results = LoadFromAssembly(assembly, query).ToArray();
+                }
+                catch (ReflectionTypeLoadException)
+                {
+                    // ignore
+                    continue;
+                }
+
+                foreach (var type in results)
                     yield return type;
             }
         }
@@ -190,7 +205,7 @@ namespace Finix.CsUtils
         {
             foreach (var type in types.Where(t => typeof(T).IsAssignableFrom(t)))
             {
-                yield return (T) Activator.CreateInstance(type) ?? throw new Exception($"Failed to create instance of type {type}");
+                yield return (T) Activator.CreateInstance(type)! ?? throw new Exception($"Failed to create instance of type {type}");
             }
         }
 
@@ -198,6 +213,7 @@ namespace Finix.CsUtils
         public static string GetDisplayName(ICustomAttributeProvider provider, string backup = "MISSING")
         {
             return GetCustomAttribute<DisplayNameAttribute>(provider)?.DisplayName
+                ?? GetCustomAttribute<DisplayAttribute>(provider)?.GetName()
                 ?? (provider is MemberInfo mi ? mi.Name : null) // Also matches System.Type
                 ?? backup;
         }

@@ -478,6 +478,10 @@ namespace Finix.CsUtils
             return text.Split(at, escapeSingle, escapeBetween.Select(pair => new EscapePair { Start = pair.Item1, End = pair.Item2 }).ToArray());
         }
 #endif
+        public static IEnumerable<string> Split(this string text, Rune[] at, Rune[] escapeSingle, EscapePair[] escapeBetween)
+        {
+            return text.EnumerateRunes().Split(at, escapeSingle, escapeBetween);
+        }
 
         public static IEnumerable<string> Split(this IEnumerable<Rune> text, Rune[] at, Rune[] escapeSingle, EscapePair[] escapeBetween)
         {
