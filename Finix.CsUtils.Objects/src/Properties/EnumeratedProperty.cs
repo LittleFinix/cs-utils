@@ -1,4 +1,5 @@
 
+using System.Linq;
 using System.Reflection;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,22 @@ namespace Finix.CsUtils
 
         public bool IsComposedType => BaseProperty.IsComposedType;
 
+        public bool IsCommonCLRType => BaseProperty.IsCommonCLRType;
+
+        public bool IsEnumerableType => BaseProperty.IsEnumerableType;
+
+        public bool IsStringType => BaseProperty.IsStringType;
+
+        public bool IsPrimitiveType => BaseProperty.IsPrimitiveType;
+
+        public bool IsArrayType => BaseProperty.IsArrayType;
+
+        public bool IsDictionaryType => BaseProperty.IsDictionaryType;
+
+        public bool IsCollectionType => BaseProperty.IsCollectionType;
+
+        public bool IsListType => BaseProperty.IsListType;
+
         public AttributeCollection Attributes => BaseProperty.Attributes;
 
         object? IProperty.Value { get => ((IProperty) BaseProperty).Value; set => ((IProperty) BaseProperty).Value = value; }
@@ -72,6 +89,41 @@ namespace Finix.CsUtils
         public bool IsDefined(Type attributeType, bool inherit)
         {
             return BaseProperty.IsDefined(attributeType, inherit);
+        }
+
+        public IEnumerable<IEnumeratedProperty> EnumerateObjectType(bool recurse, int depth, string path)
+        {
+            if (!IsCommonCLRType || Value == null)
+                return Enumerable.Empty<IEnumeratedProperty>();
+
+            var obj = new ObjectProperties(Value);
+
+            return obj.EnumerateProperties(recurse, depth, path);
+        }
+
+        public IEnumerable<IEnumeratedProperty> EnumerateObjectType(bool recurse)
+        {
+            return EnumerateObjectType(recurse, Depth, Path);
+        }
+    }
+
+    public static class EnumeratedProperty
+    {
+
+        public static IEnumeratedProperty CreateFrom(IProperties root, IProperty prop, int depth, string path)
+        {
+            path = String.Join('.', path, prop.PropertyName);
+
+            var type = typeof(EnumeratedProperty<>).MakeGenericType(prop.ValueType);
+            var con = type.GetConstructor(new[] {
+                typeof(IProperties),
+                typeof(IProperty<>).MakeGenericType(prop.ValueType),
+                typeof(string),
+                typeof(int)
+            });
+
+            return (IEnumeratedProperty) Activator.CreateInstance(type, root, prop, path, depth)!;
+            // return (IEnumeratedProperty) con!.Invoke(new object[] { root, prop, prop, depth });
         }
     }
 }

@@ -25,6 +25,22 @@ namespace Finix.CsUtils
 
         bool IsComposedType { get; }
 
+        bool IsCommonCLRType { get; }
+
+        bool IsEnumerableType { get; }
+
+        bool IsStringType { get; }
+
+        bool IsPrimitiveType { get; }
+
+        bool IsArrayType { get; }
+
+        bool IsDictionaryType { get; }
+
+        bool IsCollectionType { get; }
+
+        bool IsListType { get; }
+
         AttributeCollection Attributes { get; }
     }
 

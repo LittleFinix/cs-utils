@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Collections;
+using System.Diagnostics;
 
 namespace Finix.CsUtils
 {
@@ -23,20 +25,19 @@ namespace Finix.CsUtils
 
         public virtual void SetAll(IDictionary<string, object?> values)
         {
-            foreach (var prop in GetProperties())
+            foreach (var (name, value) in values)
             {
-                if (values.TryGetValue(prop.PropertyName, out var value))
-                    prop.Value = value;
+                GetProperty(name).Value = value;
             }
         }
 
-        public virtual IDictionary<string, object?> GetAll()
+        public virtual IDictionary<string, object?> GetAll(bool recurse = false)
         {
             var dict = new Dictionary<string, object?>();
 
-            foreach (var prop in EnumerateProperties(recurse: true))
+            foreach (var prop in EnumerateProperties(recurse))
             {
-                dict[prop.PropertyName] = prop.Value;
+                dict[prop.Path.TrimStart('.')] = prop.Value;
             }
 
             return dict;
@@ -44,7 +45,10 @@ namespace Finix.CsUtils
 
         public virtual bool TryGetProperty(string name, [MaybeNullWhen(false)] out IProperty prop)
         {
-            prop = GetProperties().FirstOrDefault(prop => prop.PropertyName == name);
+            if (!name.StartsWith('.'))
+                name = '.' + name;
+
+            prop = EnumerateProperties(recurse: true).FirstOrDefault(prop => prop.Path == name);
             return prop != null;
         }
 
@@ -96,39 +100,48 @@ namespace Finix.CsUtils
 
         protected virtual IEnumeratedProperty CreateEnumeratedProperty(IProperty prop, int depth, string path)
         {
-            path = String.Join('.', path, prop.PropertyName);
-
-            var type = typeof(EnumeratedProperty<>).MakeGenericType(prop.ValueType);
-
-            return (IEnumeratedProperty) Activator.CreateInstance(type, this, prop, depth, prop)!;
+            return EnumeratedProperty.CreateFrom(this, prop, depth, path);
 
         }
 
         protected IProperty[] GetReflectedProperties(Type type)
         {
-            return type.GetRuntimeProperties()
+            var props = type.GetProperties()
                 .Where(prop => // prop.SetMethod != null && prop.SetMethod.IsPublic &&
                     prop.GetMethod != null && prop.GetMethod.IsPublic
                     && prop.GetMethod.GetParameters().Count() == 0
                     && prop.GetCustomAttribute<IgnoreDataMemberAttribute>() == null
-                    && prop.GetCustomAttribute<NonSerializedAttribute>() == null)
+                    && prop.GetCustomAttribute<NonSerializedAttribute>() == null);
+
+            var fields = type.GetFields()
+                .Where(field =>
+                    field.GetCustomAttribute<IgnoreDataMemberAttribute>() == null
+                    && field.GetCustomAttribute<NonSerializedAttribute>() == null);
+
+            return
+                props.Concat<MemberInfo>(fields)
                 .Select(CreateProperty)
+                .OrderBy(prop => prop.PropertyName)
                 .OrderBy(prop => prop.Order)
                 .ToArray();
         }
 
-        protected virtual IEnumerable<IEnumeratedProperty> EnumeratePropertiesInternal(bool recurse, int depth, string path)
+        public virtual IEnumerable<IEnumeratedProperty> EnumerateProperties(bool recurse, int depth, string path)
         {
             foreach (var prop in GetProperties())
             {
+#if DEBUG
+                // Debug.WriteLine($"Found property {prop}");
+#endif
+
                 yield return CreateEnumeratedProperty(prop, depth, path);
 
                 if (recurse && prop.IsComposedType && prop.Value != null)
                 {
-                    var obj = new ObjectProperties(prop.Value);
                     var nextPath = String.Join('.', path, prop.PropertyName);
+                    var obj = new ObjectProperties(prop.Value);
 
-                    foreach (var item in obj.EnumeratePropertiesInternal(recurse: true, depth + 1, nextPath))
+                    foreach (var item in obj.EnumerateProperties(recurse: true, depth + 1, nextPath))
                         yield return item;
                 }
             }
@@ -136,7 +149,7 @@ namespace Finix.CsUtils
 
         public virtual IEnumerable<IEnumeratedProperty> EnumerateProperties(bool recurse)
         {
-            return EnumeratePropertiesInternal(recurse, 0, String.Empty);
+            return EnumerateProperties(recurse, 0, String.Empty);
         }
     }
 }

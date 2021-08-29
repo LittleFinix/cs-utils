@@ -5,7 +5,7 @@
     <DefaultNamespace>Finix.CsUtils</DefaultNamespace>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>0.1.12</Version>
+    <Version>0.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

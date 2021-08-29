@@ -42,13 +42,13 @@ namespace Finix.CsUtils
             }
         }
 
-        public IDictionary<string, object?> GetAll()
+        public IDictionary<string, object?> GetAll(bool recurse = false)
         {
             var properties = new Dictionary<string, object?>();
 
             foreach (var (map, props) in Mappings)
             {
-                foreach (var (prop, value) in props.GetAll())
+                foreach (var (prop, value) in props.GetAll(recurse))
                     properties[$"{map}.{prop}"] = value;
             }
 
@@ -74,6 +74,11 @@ namespace Finix.CsUtils
                 foreach (var prop in props.GetProperties())
                     yield return prop;
             }
+        }
+
+        public IEnumerable<IEnumeratedProperty> EnumerateProperties(bool recurse, int depth, string path)
+        {
+            throw new NotImplementedException();
         }
 
         public IEnumerable<IEnumeratedProperty> EnumerateProperties(bool recurse)

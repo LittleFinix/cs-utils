@@ -14,6 +14,10 @@ namespace Finix.CsUtils
         string Path { get; }
 
         int Depth { get; }
+
+        IEnumerable<IEnumeratedProperty> EnumerateObjectType(bool recurse, int depth, string path);
+
+        IEnumerable<IEnumeratedProperty> EnumerateObjectType(bool recurse);
     }
 
     public interface IEnumeratedProperty<T> : IEnumeratedProperty, IProperty<T>

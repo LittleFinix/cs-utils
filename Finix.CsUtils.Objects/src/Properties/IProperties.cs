@@ -15,7 +15,7 @@ namespace Finix.CsUtils
 
         void SetAll(IDictionary<string, object?> values);
 
-        IDictionary<string, object?> GetAll();
+        IDictionary<string, object?> GetAll(bool recurse = false);
 
         IEnumerable<IProperty> GetProperties();
 
@@ -26,6 +26,8 @@ namespace Finix.CsUtils
         IProperty GetProperty(string name);
 
         IProperty<T> GetProperty<T>(string name);
+
+        IEnumerable<IEnumeratedProperty> EnumerateProperties(bool recurse, int depth, string path);
 
         IEnumerable<IEnumeratedProperty> EnumerateProperties(bool recurse);
     }
