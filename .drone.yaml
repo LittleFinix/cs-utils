@@ -1,0 +1,83 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+environment:
+  CONFIG: Release
+  DIST: nuget_dist
+
+steps:
+  - name: compile
+    image: mcr.microsoft.com/dotnet/core/sdk:5.0
+    commands:
+      - dotnet nuget add source -n LFNET https://nuget.littlefinix.net
+      - dotnet build -c "$CONFIG"
+
+  - name: test
+    image: mcr.microsoft.com/dotnet/core/sdk:5.0
+    commands:
+      - dotnet nuget add source -n LFNET https://nuget.littlefinix.net
+      - dotnet test
+
+  - name: pack
+    image: mcr.microsoft.com/dotnet/core/sdk:5.0
+    commands:
+      - dotnet nuget add source -n LFNET https://nuget.littlefinix.net
+      - dotnet pack -c "$CONFIG" -o "$DIST"
+      - '[ -f CHANGELOG.md ] && cp CHANGELOG.md "$DIST"'
+      - cd "$DIST"
+      - date +%F > TITLE.md
+      - GIT_TAG_SINCE="$(git describe --tags --abbrev=0)"
+      - '[ ! -f CHANGELOG.md] && git log "$GIT_TAG_SINCE.." --pretty=format:"- [view](../commit/%H) - %s" --reverse > CHANGELOG.md'
+    when:
+      event:
+        - promote
+        - tag
+
+  - name: gitea release
+    image: plugins/gitea-release
+    settings:
+      api_key:
+        from_secret: gitea_token
+      base_url: https://git.littlefinix.net/
+      files: $DIST/*.nuget
+      title: $DIST/TITLE.md
+      note: $DIST/CHANGELOG.md
+      # checksum:
+      #   - md5
+      #   - sha1
+      #   - sha256
+      #   - sha512
+      #   - crc32
+    when:
+      event:
+        - tag
+
+  - name: push
+    image: mcr.microsoft.com/dotnet/core/sdk:5.0
+    environment:
+      NUGET_REPO: https://nuget.littlefinix.net
+      NUGET_KEY:
+        from_secret: nuget_key
+    commands:
+      - for file in "$DIST/*.nuget" do; dotnet nuget push --skip-duplicate "$file" -s "$NUGET_REPO" -k "$NUGET_KEY; done"
+    when:
+      event:
+        - promote
+        - tag
+
+  # - name: ftp release
+  #   image: eeacms/rsync
+  #   environment:
+  #     UPLOAD_TARGET:
+  #       from_secret: rsync_target
+  #     RSYNC_PASSWORD:
+  #       from_secret: rsync_password
+  #   commands:
+  #     - "export CURRENT_DATE=$(date +%F)"
+  #     - 'rsync --delete -r dist/ "rsync://$UPLOAD_TARGET/volume/$CURRENT_DATE/"'
+  #     - 'rsync --delete -r dist/ "rsync://$UPLOAD_TARGET/volume/latest/"'
+  #   when:
+  #     event:
+  #       - promote
